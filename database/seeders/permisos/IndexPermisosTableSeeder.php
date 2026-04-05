@@ -19,7 +19,8 @@ class IndexPermisosTableSeeder extends Seeder
 
    $this->call([
             FacultadPermisosTableSeeder::class,
-            CicloPermisosTableSeeder::class
+            CicloPermisosTableSeeder::class,
+            CursoPermisosTableSeeder::class,
         ]);
 
     }

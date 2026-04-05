@@ -18,6 +18,9 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::apiResource('ciclos', App\Http\Controllers\Api\Pensum\CicloApiController::class)
         ->parameters(['ciclos' => 'ciclo']);
 
+    Route::apiResource('cursos', App\Http\Controllers\Api\Pensum\CursoApiController::class)
+        ->parameters(['cursos' => 'curso']);
+
 
 });
 
@@ -28,6 +31,7 @@ Route::prefix('libres')->group(function () {
     require __DIR__.'/admin/Configuraciones/api_libres.php';
 
 });
+
 
 
 
