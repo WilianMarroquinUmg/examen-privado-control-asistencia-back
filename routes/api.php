@@ -15,6 +15,10 @@ Route::middleware('auth:sanctum')->group(function () {
         ->parameters(['facultades' => 'facultad']);
 
 
+    Route::apiResource('ciclos', App\Http\Controllers\Api\Pensum\CicloApiController::class)
+        ->parameters(['ciclos' => 'ciclo']);
+
+
 });
 
 require __DIR__.'/auth.php';

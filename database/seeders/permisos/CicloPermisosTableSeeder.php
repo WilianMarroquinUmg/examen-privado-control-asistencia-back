@@ -1,11 +1,12 @@
 <?php
 
-namespace {{ seederNamespace }};
+namespace Database\Seeders\permisos;
 
-use App\Models\Rol;
 use App\Models\Permission;
+use App\Models\Rol;
+use Illuminate\Database\Seeder;
 
-class {{ seederPermisosName }} extends Seeder
+class CicloPermisosTableSeeder extends Seeder
 {
     /**
      * Run the database seeds.
@@ -16,16 +17,16 @@ class {{ seederPermisosName }} extends Seeder
     {
 
         $permisos = [
-            'Ver {{ variableTitleCase }}',
-            'Crear {{ variableTitleCase }}',
-            'Editar {{ variableTitleCase }}',
-            'Eliminar {{ variableTitleCase }}',
+            'Ver Ciclos',
+            'Crear Ciclos',
+            'Editar Ciclos',
+            'Eliminar Ciclos',
         ];
 
         foreach ($permisos as $permiso) {
             Permission::create([
                 'name' => $permiso,
-                'subject' => '{{ model }}',
+                'subject' => 'Ciclo',
                 'guard_name' => 'api',
             ]);
         }
