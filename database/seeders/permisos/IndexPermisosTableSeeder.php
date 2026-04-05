@@ -21,6 +21,7 @@ class IndexPermisosTableSeeder extends Seeder
             FacultadPermisosTableSeeder::class,
             CicloPermisosTableSeeder::class,
             CursoPermisosTableSeeder::class,
+       MenuPermisosTableSeeder::class,
         ]);
 
     }
