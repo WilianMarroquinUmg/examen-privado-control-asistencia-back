@@ -11,6 +11,10 @@ Route::middleware('auth:sanctum')->group(function () {
 
     require __DIR__.'/admin/api.php';
 
+    Route::apiResource('facultades', App\Http\Controllers\Api\Pensum\FacultadApiController::class)
+        ->parameters(['facultades' => 'facultad']);
+
+
 });
 
 require __DIR__.'/auth.php';
@@ -20,6 +24,7 @@ Route::prefix('libres')->group(function () {
     require __DIR__.'/admin/Configuraciones/api_libres.php';
 
 });
+
 
 
 

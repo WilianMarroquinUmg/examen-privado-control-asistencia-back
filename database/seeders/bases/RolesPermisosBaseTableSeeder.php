@@ -26,6 +26,8 @@ class RolesPermisosBaseTableSeeder extends Seeder
         $rolAdministrador = Role::create(['name' => 'Administrador', 'guard_name' => 'web']);
         $rolEmpleado = Role::create(['name' => 'Empleado', 'guard_name' => 'web']);
         $rolProgramador = Role::create(['name' => 'Programador', 'guard_name' => 'web']);
+        $rolEstudiante = Role::create(['name' => 'Estudiante', 'guard_name' => 'web']);
+        $catedratico = Role::create(['name' => 'Catedrático', 'guard_name' => 'web']);
 
         // Permisos para administrar las Opciones Del Menu.
         Permission::create(['name' => 'Ver Menu Opciones', 'subject' => 'Menu Opcion', 'guard_name' => 'web']);

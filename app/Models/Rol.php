@@ -35,6 +35,12 @@ class Rol extends SpatieRole
 
     protected $table = 'roles';
 
+    const ADMIN = 1;
+    const EMPLEADO = 2;
+    const PROGRAMADOR = 3;
+    const ESTUDIANTE = 4;
+    const CATEDRATICO = 5;
+
     const GUARD_NAME_ACTUAL = 'web';
     protected $fillable = [
         'name',
@@ -66,7 +72,6 @@ class Rol extends SpatieRole
     public static $rulesUpdated = [
         'name' => 'required|string|max:255',
     ];
-
 
 
     /**

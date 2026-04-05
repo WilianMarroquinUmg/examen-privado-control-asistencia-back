@@ -1,12 +1,12 @@
 <?php
 
-namespace {{ seederNamespace }};
+namespace Database\Seeders\permisos;
 
+use App\Models\Permission;
 use App\Models\Rol;
 use Illuminate\Database\Seeder;
-use App\Models\Permission;
 
-class {{ seederPermisosName }} extends Seeder
+class FacultadPermisosTableSeeder extends Seeder
 {
     /**
      * Run the database seeds.
@@ -17,21 +17,21 @@ class {{ seederPermisosName }} extends Seeder
     {
 
         $permisos = [
-            'Ver {{ variableTitleCase }}',
-            'Crear {{ variableTitleCase }}',
-            'Editar {{ variableTitleCase }}',
-            'Eliminar {{ variableTitleCase }}',
+            'Ver Facultades',
+            'Crear Facultades',
+            'Editar Facultades',
+            'Eliminar Facultades',
         ];
 
         foreach ($permisos as $permiso) {
             Permission::create([
                 'name' => $permiso,
-                'subject' => '{{ model }}',
+                'subject' => 'Facultad',
                 'guard_name' => 'api',
             ]);
         }
 
-        $admin = Rol::find(Role::ADMIN);
+        $admin = Rol::find(Rol::ADMIN);
 
         $admin->givePermissionTo($permisos);
 
