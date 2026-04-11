@@ -4,11 +4,12 @@ namespace App\Models\Pensum;
 
 
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 
 /**
- * 
+ *
  *
  * @property int $id
  * @property string $nombre
@@ -79,12 +80,37 @@ class Ciclo extends Model
 
     ];
 
+    public function facultades(): BelongsToMany
+    {
+        return $this->belongsToMany(
+            Facultad::class,
+            'facultad_ciclos',
+            'ciclos_id',
+            'facultades_id'
+        );
+    }
+
+    public function scopeSinAsociarAFacultad($query, $facultadId)
+    {
+        return $query->whereDoesntHave('facultades', function ($q) use ($facultadId) {
+            $q->where('facultades_id', $facultadId);
+        });
+
+    }
+
+    public function scopeAsociadosAFacultad($query, $facultadId)
+    {
+        return $query->whereHas('facultades', function ($q) use ($facultadId) {
+            $q->where('facultades_id', $facultadId);
+        });
+
+    }
 
     /**
      * Accessor for relationships
      *
      * @var array
      */
-    
+
 
 }

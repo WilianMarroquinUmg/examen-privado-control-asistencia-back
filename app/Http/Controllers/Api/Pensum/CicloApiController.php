@@ -10,6 +10,7 @@ use App\Http\Requests\Api\Pensum\UpdateCicloApiRequest;
 use App\Models\Pensum\Ciclo;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
+use Spatie\QueryBuilder\AllowedFilter;
 use Spatie\QueryBuilder\QueryBuilder;
 
 /**
@@ -40,11 +41,14 @@ class CicloApiController extends AppbaseController implements HasMiddleware
     {
         $ciclos = QueryBuilder::for(Ciclo::class)
             ->allowedFilters([
-    'nombre'
-])
+                AllowedFilter::exact('id'),
+                'nombre',
+                AllowedFilter::scope('asociadosAFacultad', 'asociadosAFacultad'),
+                AllowedFilter::scope('sinAsociarAFacultad', 'sinAsociarAFacultad'),
+            ])
             ->allowedSorts([
-    'nombre'
-])
+                'nombre'
+            ])
             ->defaultSort('-id') // Ordenar por defecto por fecha descendente
             ->Paginate(request('page.size') ?? 10);
 
@@ -75,9 +79,9 @@ class CicloApiController extends AppbaseController implements HasMiddleware
     }
 
     /**
-    * Update the specified Ciclo in storage.
-    * PUT/PATCH /ciclos/{id}
-    */
+     * Update the specified Ciclo in storage.
+     * PUT/PATCH /ciclos/{id}
+     */
     public function update(UpdateCicloApiRequest $request, $id): JsonResponse
     {
         $ciclo = Ciclo::findOrFail($id);
@@ -86,9 +90,9 @@ class CicloApiController extends AppbaseController implements HasMiddleware
     }
 
     /**
-    * Remove the specified Ciclo from storage.
-    * DELETE /ciclos/{id}
-    */
+     * Remove the specified Ciclo from storage.
+     * DELETE /ciclos/{id}
+     */
     public function destroy(Ciclo $ciclo): JsonResponse
     {
         $ciclo->delete();

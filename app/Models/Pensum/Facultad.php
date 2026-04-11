@@ -4,11 +4,12 @@ namespace App\Models\Pensum;
 
 
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 
 /**
- * 
+ *
  *
  * @property int $id
  * @property string $nombre
@@ -90,6 +91,16 @@ class Facultad extends Model
      *
      * @var array
      */
-    
+
+    public function ciclos(): BelongsToMany
+    {
+        return $this->belongsToMany(
+            Ciclo::class,
+            'facultad_ciclos',
+            'facultades_id',
+            'ciclos_id'
+        );
+
+    }
 
 }
