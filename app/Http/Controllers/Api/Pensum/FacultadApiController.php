@@ -116,4 +116,23 @@ class FacultadApiController extends AppbaseController implements HasMiddleware
         return $this->sendResponse(null, 'Ciclo asociado a la facultad con éxito.');
 
     }
+
+    public function desAsociarCiclo(Request $request)
+    {
+        $request->validate([
+            'facultad_id' => 'required|exists:facultades,id',
+            'ciclo_id' => 'required|exists:ciclos,id',
+        ]);
+
+        $facultad = Facultad::findOrFail($request->input('facultad_id'));
+        $cicloId = $request->input('ciclo_id');
+
+        if (!$facultad->ciclos()->where('ciclos.id', $cicloId)->exists()) {
+            return $this->sendError('El ciclo no está asociado a esta facultad.');
+        }
+
+        $facultad->ciclos()->detach($cicloId);
+
+        return $this->sendResponse(null, 'Ciclo desasociado de la facultad con éxito.');
+    }
 }

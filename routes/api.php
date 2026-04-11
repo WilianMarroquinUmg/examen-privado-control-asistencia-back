@@ -14,6 +14,8 @@ Route::middleware('auth:sanctum')->group(function () {
 
     Route::post('facultad-asociar-ciclo', [FacultadApiController::class, 'asociarCiclo']);
 
+    Route::post('facultad-des-asociar-ciclo', [FacultadApiController::class, 'desAsociarCiclo']);
+
     Route::apiResource('facultades', FacultadApiController::class)
         ->parameters(['facultades' => 'facultad']);
 
