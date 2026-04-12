@@ -19,6 +19,7 @@ return new class extends Migration
             $table->string('segundo_apellido')->nullable();
             $table->string('usuario')->unique();
             $table->string('email')->unique()->nullable();
+            $table->string('carnet')->unique()->nullable();
             $table->unsignedBigInteger('estado_id');
             $table->timestamp('email_verified_at')->nullable();
             $table->string('password');

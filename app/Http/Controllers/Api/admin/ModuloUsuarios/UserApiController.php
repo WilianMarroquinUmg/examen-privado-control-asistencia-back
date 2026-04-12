@@ -11,6 +11,7 @@ use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Routing\Controllers\HasMiddleware;
 use Illuminate\Routing\Controllers\Middleware;
+use Spatie\QueryBuilder\AllowedFilter;
 use Spatie\QueryBuilder\QueryBuilder;
 
 /**
@@ -52,6 +53,8 @@ class UserApiController extends AppbaseController implements HasMiddleware
                 'segundo_apellido',
                 'usuario',
                 'email',
+                AllowedFilter::scope('busquedaAvanzada', 'busquedaAvanzada'),
+                AllowedFilter::scope('sinUsuarioIds', 'sinUsuarioIds'),
             ])
             ->allowedSorts([
                 'id',

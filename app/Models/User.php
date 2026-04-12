@@ -3,6 +3,7 @@
 namespace App\Models;
 
 // use Illuminate\Contracts\Auth\MustVerifyEmail;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
@@ -150,6 +151,39 @@ class User extends Authenticatable implements HasMedia
 
     }
 
+    /**
+     * Scope para buscar usuarios por nombres, apellidos, email o carnet.
+     */
+    public function scopeBusquedaAvanzada(Builder $query, $termino = null)
+    {
+        if (empty($termino)) {
+            return $query;
+        }
 
+        return $query->where(function (Builder $q) use ($termino) {
+            $q->where('primer_nombre', 'LIKE', "%{$termino}%")
+                ->orWhere('segundo_nombre', 'LIKE', "%{$termino}%")
+                ->orWhere('primer_apellido', 'LIKE', "%{$termino}%")
+                ->orWhere('segundo_apellido', 'LIKE', "%{$termino}%")
+                ->orWhere('email', 'LIKE', "%{$termino}%")
+                ->orWhere('carnet', 'LIKE', "%{$termino}%")
+
+                ->orWhereRaw("CONCAT_WS(' ', primer_nombre, segundo_nombre, primer_apellido, segundo_apellido) LIKE ?", ["%{$termino}%"]);
+        });
+    }
+
+    /**
+     * Excluye usuarios por ID pasados como un string separado por guiones ("1-2-3")
+     */
+    public function scopeSinUsuarioIds(Builder $query, $ids)
+    {
+        if (empty($ids)) {
+            return $query;
+        }
+
+        $arregloIds = is_string($ids) ? explode('-', $ids) : $ids;
+
+        return $query->whereNotIn('id', $arregloIds);
+    }
 
 }
