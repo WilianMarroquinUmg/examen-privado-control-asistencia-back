@@ -27,6 +27,13 @@ class MenuOpcionesTableSeeder extends Seeder
                 "subject" => "Inicio",
             ],
             [
+                "titulo" => "Crear Espacio",
+                "icono" => "ri-add-large-line",
+                "ruta" => "crear-espacio",
+                "action" => "Listar Crear Espacio",
+                "subject" => "Espacio",
+            ],
+            [
                 "titulo_seccion" => "Administración",
                 "action" => "Ver Modulo Usuarios",
                 "subject" => "User",
