@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\Api\Pensum\CicloApiController;
 use App\Http\Controllers\Api\Pensum\FacultadApiController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
@@ -19,7 +20,12 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::apiResource('facultades', FacultadApiController::class)
         ->parameters(['facultades' => 'facultad']);
 
-    Route::apiResource('ciclos', App\Http\Controllers\Api\Pensum\CicloApiController::class)
+    Route::post('ciclos-asociar-cursos', [CicloApiController::class, 'asignarCurso']);
+
+    Route::post('ciclos-des-asociar-cursos', [CicloApiController::class, 'desAsociarCurso']);
+
+
+    Route::apiResource('ciclos', CicloApiController::class)
         ->parameters(['ciclos' => 'ciclo']);
 
     Route::apiResource('cursos', App\Http\Controllers\Api\Pensum\CursoApiController::class)

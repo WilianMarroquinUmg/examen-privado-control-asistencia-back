@@ -6,6 +6,7 @@ namespace App\Models\Pensum;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
 /**
@@ -90,6 +91,16 @@ class Curso extends Model
 
     ];
 
+    public function ciclos(): BelongsToMany
+    {
+        return $this->belongsToMany(
+            Ciclo::class,
+            'ciclos_has_cursos',
+            'cursos_id',
+            'ciclos_id'
+        );
+    }
+
     /**
      * SCOPE 1: Traer cursos que NO están asociados a esta facultad y ciclo
      * Ideal para el SelectorPro al momento de agregar un curso nuevo.
@@ -100,7 +111,7 @@ class Curso extends Model
      */
     public function scopeSinAsociarACicloYFacultad(Builder $query, $facultadYCiclo)
     {
-        $ids = explode(',', $facultadYCiclo);
+        $ids = explode('-', $facultadYCiclo);
 
         if (count($ids) !== 2) {
             return $query; // Si viene mal formado, regresamos la consulta sin filtrar para que no truene
@@ -124,13 +135,12 @@ class Curso extends Model
     public function scopeAsociadosACicloYFacultad(Builder $query, $facultadYCiclo)
     {
         // 1. Separamos el string por la coma
-        $ids = explode(',', $facultadYCiclo);
+        $ids = explode('-', $facultadYCiclo);
 
         // 2. Validamos que vengan exactamente los dos datos (Facultad y Ciclo)
         if (count($ids) !== 2) {
             return $query; // Si viene mal formado, regresamos la consulta sin alterar
         }
-
         $facultadId = $ids[0];
         $cicloId = $ids[1];
 

@@ -97,4 +97,32 @@ class CicloApiController extends AppbaseController implements HasMiddleware
         $ciclo->delete();
         return $this->sendResponse(null, 'Ciclo eliminado con éxito.');
     }
+
+    public function asignarCurso(Request $request): JsonResponse
+    {
+        $request->validate([
+            'ciclo_id' => 'required|exists:ciclos,id',
+            'curso_id' => 'required|exists:cursos,id',
+        ]);
+
+        $ciclo = Ciclo::findOrFail($request->ciclo_id);
+
+        $ciclo->cursos()->attach($request->curso_id);
+
+        return $this->sendSuccess('Cursos asignados al ciclo con éxito.');
+    }
+
+        public function desAsociarCurso(Request $request): JsonResponse
+        {
+            $request->validate([
+                'ciclo_id' => 'required|exists:ciclos,id',
+                'curso_id' => 'required|exists:cursos,id',
+            ]);
+
+            $ciclo = Ciclo::findOrFail($request->ciclo_id);
+
+            $ciclo->cursos()->detach($request->curso_id);
+
+            return $this->sendSuccess('Cursos desasociados del ciclo con éxito.');
+        }
 }

@@ -40,8 +40,8 @@ class Ciclo extends Model
 
     protected $fillable =
         [
-    'nombre'
-];
+            'nombre'
+        ];
 
 
     /**
@@ -51,13 +51,12 @@ class Ciclo extends Model
      */
     protected $casts =
         [
-        'id' => 'integer',
-        'nombre' => 'string',
-        'created_at' => 'timestamp',
-        'updated_at' => 'timestamp',
-        'deleted_at' => 'timestamp',
-    ];
-
+            'id' => 'integer',
+            'nombre' => 'string',
+            'created_at' => 'timestamp',
+            'updated_at' => 'timestamp',
+            'deleted_at' => 'timestamp',
+        ];
 
 
     /**
@@ -66,9 +65,9 @@ class Ciclo extends Model
      * @var array
      */
     public static $rules =
-    [
-    'nombre' => 'required|string|max:50',
-];
+        [
+            'nombre' => 'required|string|max:50',
+        ];
 
 
     /**
@@ -76,7 +75,7 @@ class Ciclo extends Model
      *
      * @var array
      */
-    public static $messages =[
+    public static $messages = [
 
     ];
 
@@ -88,6 +87,17 @@ class Ciclo extends Model
             'ciclos_id',
             'facultades_id'
         );
+    }
+
+    public function cursos(): BelongsToMany
+    {
+        return $this->belongsToMany(
+            Curso::class,
+            'ciclos_has_cursos',
+            'ciclos_id',
+            'cursos_id'
+        );
+
     }
 
     public function scopeSinAsociarAFacultad($query, $facultadId)
