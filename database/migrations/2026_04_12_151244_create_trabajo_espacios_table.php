@@ -17,6 +17,7 @@ return new class extends Migration
             $table->unsignedBigInteger('facultad_id')->index('fk_trabajo_espacios_facultades1_idx');
             $table->unsignedBigInteger('ciclo_id')->index('fk_trabajo_espacios_ciclos1_idx');
             $table->unsignedBigInteger('curso_id')->index('fk_trabajo_espacios_cursos1_idx');
+            $table->enum('estado', ['Pendiente', 'Activo', 'Finalizado'])->default('Pendiente');
             $table->timestamps();
             $table->softDeletes();
         });

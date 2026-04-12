@@ -4,7 +4,7 @@ namespace Database\Seeders\permisos;
 
 use App\Models\Permission;
 use App\Models\Rol;
-use Database\Seeders\EspacioTrabajo\Seeder;
+use Illuminate\Database\Seeder;
 
 class TrabajoEspacioPermisosTableSeeder extends Seeder
 {
