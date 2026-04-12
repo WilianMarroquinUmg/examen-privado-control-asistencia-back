@@ -17,11 +17,12 @@ class IndexPermisosTableSeeder extends Seeder
     public function run()
     {
 
-   $this->call([
+        $this->call([
             FacultadPermisosTableSeeder::class,
             CicloPermisosTableSeeder::class,
             CursoPermisosTableSeeder::class,
-       MenuPermisosTableSeeder::class,
+            MenuPermisosTableSeeder::class,
+            TrabajoEspacioPermisosTableSeeder::class
         ]);
 
     }
