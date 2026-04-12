@@ -19,6 +19,7 @@ class MenuPermisosTableSeeder extends Seeder
         $permisos = [];
 
         $permisos[] = Permission::create(['name' => 'Listar Crear Espacio', 'subject' => 'Espacio', 'guard_name' => 'web',]);
+        $permisos[] = Permission::create(['name' => 'Listar Mis Espacios', 'subject' => 'Espacio', 'guard_name' => 'web',]);
         $permisos[] = Permission::create(['name' => 'Ver Modulo Pensums', 'subject' => 'Pensum', 'guard_name' => 'web',]);
         $permisos[] = Permission::create(['name' => 'Listar Modulo Pensums', 'subject' => 'Pensum', 'guard_name' => 'web',]);
         $permisos[] = Permission::create(['name' => 'Listar Facultades', 'subject' => 'Facultad', 'guard_name' => 'web',]);

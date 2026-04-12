@@ -29,8 +29,15 @@ class MenuOpcionesTableSeeder extends Seeder
             [
                 "titulo" => "Crear Espacio",
                 "icono" => "ri-add-large-line",
-                "ruta" => "crear-espacio",
+                "ruta" => "espacio-trabajo-crear",
                 "action" => "Listar Crear Espacio",
+                "subject" => "Espacio",
+            ],
+            [
+                "titulo" => "Mis Espacios",
+                "icono" => "ri-list-ordered-2",
+                "ruta" => "espacio-trabajo-mis-espacios",
+                "action" => "Listar Mis Espacios",
                 "subject" => "Espacio",
             ],
             [

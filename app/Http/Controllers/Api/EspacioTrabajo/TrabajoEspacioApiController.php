@@ -15,6 +15,8 @@ use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
+use Spatie\QueryBuilder\AllowedFilter;
+use Spatie\QueryBuilder\AllowedInclude;
 use Spatie\QueryBuilder\QueryBuilder;
 
 /**
@@ -24,6 +26,7 @@ class TrabajoEspacioApiController extends AppbaseController implements HasMiddle
 {
 
     use EspacioTrabajoTrait;
+
     /**
      * @return array
      */
@@ -46,17 +49,24 @@ class TrabajoEspacioApiController extends AppbaseController implements HasMiddle
     {
         $trabajo_espacios = QueryBuilder::for(TrabajoEspacio::class)
             ->allowedFilters([
-    'catedratico_id',
-    'facultad_id',
-    'ciclo_id',
-    'curso_id'
-])
+                'catedratico_id',
+                'facultad_id',
+                'ciclo_id',
+                'curso_id',
+                AllowedFilter::scope('buscar', 'buscar')
+            ])
             ->allowedSorts([
-    'catedratico_id',
-    'facultad_id',
-    'ciclo_id',
-    'curso_id'
-])
+                'catedratico_id',
+                'facultad_id',
+                'ciclo_id',
+                'curso_id'
+            ])
+            ->allowedIncludes([
+                'ciclo',
+                'curso',
+                'facultad',
+                'catedratico'
+            ])
             ->defaultSort('-id') // Ordenar por defecto por fecha descendente
             ->Paginate(request('page.size') ?? 10);
 
@@ -75,10 +85,10 @@ class TrabajoEspacioApiController extends AppbaseController implements HasMiddle
 
         try {
             $espacio = TrabajoEspacio::create([
-                'facultad_id'      => $request->input('facultad_id'),
-                'ciclo_id'         => $request->input('ciclo_id'),
-                'curso_id'         => $request->input('curso_id'),
-                'catedratico_id'   => Auth::id(),
+                'facultad_id' => $request->input('facultad_id'),
+                'ciclo_id' => $request->input('ciclo_id'),
+                'curso_id' => $request->input('curso_id'),
+                'catedratico_id' => Auth::id(),
             ]);
 
             $datosInscripcion = $request->all()['alumnos'] ?? [];
@@ -122,7 +132,7 @@ class TrabajoEspacioApiController extends AppbaseController implements HasMiddle
 
         } catch (Exception $e) {
             DB::rollBack();
-            return $this->sendError('Error al procesar la inscripción: ' . $e->getMessage());
+            return $this->sendError('Error al procesar la inscripción: '.$e->getMessage());
         }
     }
 
@@ -136,9 +146,9 @@ class TrabajoEspacioApiController extends AppbaseController implements HasMiddle
     }
 
     /**
-    * Update the specified TrabajoEspacio in storage.
-    * PUT/PATCH /trabajo_espacios/{id}
-    */
+     * Update the specified TrabajoEspacio in storage.
+     * PUT/PATCH /trabajo_espacios/{id}
+     */
     public function update(UpdateTrabajoEspacioApiRequest $request, $id): JsonResponse
     {
         $trabajoespacio = TrabajoEspacio::findOrFail($id);
@@ -147,9 +157,9 @@ class TrabajoEspacioApiController extends AppbaseController implements HasMiddle
     }
 
     /**
-    * Remove the specified TrabajoEspacio from storage.
-    * DELETE /trabajo_espacios/{id}
-    */
+     * Remove the specified TrabajoEspacio from storage.
+     * DELETE /trabajo_espacios/{id}
+     */
     public function destroy(TrabajoEspacio $trabajoespacio): JsonResponse
     {
         $trabajoespacio->delete();

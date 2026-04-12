@@ -7,6 +7,7 @@ use App\Models\Pensum\Ciclo;
 use App\Models\Pensum\Curso;
 use App\Models\Pensum\Facultad;
 use App\Models\User;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
@@ -91,6 +92,7 @@ class TrabajoEspacio extends Model implements HasMedia
             'curso_id' => 'required|integer',
         ];
 
+    protected $appends = ['cantidad_alumnos'];
 
     /**
      * Custom messages for validation
@@ -135,5 +137,23 @@ class TrabajoEspacio extends Model implements HasMedia
             'trabajo_espacios_id',
             'users_id'
         );
+    }
+
+    public function scopeBuscar(Builder $query, $busqueda)
+    {
+        if (!empty($busqueda)) {
+            $query->whereHas('ciclo', function (Builder $q) use ($busqueda) {
+                $q->where('nombre', 'like', '%' . $busqueda . '%');
+            })->orWhereHas('curso', function (Builder $q) use ($busqueda) {
+                $q->where('nombre', 'like', '%' . $busqueda . '%');
+            })->orWhereHas('facultad', function (Builder $q) use ($busqueda) {
+                $q->where('nombre', 'like', '%' . $busqueda . '%');
+            });
+        }
+    }
+
+    public function getCantidadAlumnosAttribute(): int
+    {
+        return $this->alumnos()->count();
     }
 }
