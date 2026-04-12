@@ -16,6 +16,10 @@ return new class extends Migration
             $table->unsignedBigInteger('alumno_id')->index('fk_asignaciones_users1_idx');
             $table->unsignedBigInteger('catedratico_id')->index('fk_asignaciones_users2_idx');
             $table->unsignedBigInteger('facultad_ciclo_curso_id')->index('fk_asignaciones_facultad_ciclo_cursos1_idx');
+
+            $table->unsignedBigInteger('facultad_id')->index('fk_asignaciones_facultad_idx');
+            $table->unsignedBigInteger('ciclo_id')->index('fk_asignaciones_ciclo_idx');
+            $table->unsignedBigInteger('curso_id')->index('fk_asignaciones_curso_idx');
         });
     }
 
