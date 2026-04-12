@@ -7,6 +7,9 @@ use App\Models\User;
 use Illuminate\Support\Str;
 use Maatwebsite\Excel\Facades\Excel;
 use Smalot\PdfParser\Parser;
+use Aws\Rekognition\RekognitionClient;
+use Aws\Exception\AwsException;
+use Illuminate\Support\Facades\Log;
 
 trait EspacioTrabajoTrait
 {
@@ -149,26 +152,80 @@ trait EspacioTrabajoTrait
     }
 
     /**
-     * Guarda la imagen, la manda a IA (ej. AWS Rekognition) y devuelve los IDs.
+     * Extrae el texto usando AWS Rekognition y busca carnets con Regex.
      */
     private function extraerConIA(TrabajoEspacio $espacio, array $archivos): array
     {
-        $carnetsExtraidos = [];
+        $identificadoresEncontrados = [];
+
+        $rekognition = new RekognitionClient([
+            'region'  => env('AWS_DEFAULT_REGION', 'us-east-1'),
+            'version' => 'latest',
+            'credentials' => [
+                'key'    => env('AWS_ACCESS_KEY_ID'),
+                'secret' => env('AWS_SECRET_ACCESS_KEY'),
+            ]
+        ]);
 
         foreach ($archivos as $archivo) {
             if ($archivo instanceof \Illuminate\Http\UploadedFile) {
-                // 1. Guardar foto como respaldo (importante para auditorías)
+
+                // 🚀 1. PRIMERO leemos los bytes de la imagen en la memoria RAM
+                $imagenBytes = file_get_contents($archivo->path());
+
+                // 🚀 2. LUEGO guardamos el respaldo (Spatie mueve el archivo y lo desaparece del temporal)
                 $espacio->addMedia($archivo)->toMediaCollection('importaciones_ia');
 
-                // 2. Aquí llamas a tu servicio de IA (ej: AWS Rekognition detectText)
-                // $resultadosIA = AwsVision::detectText($archivo->path());
+                try {
+                    // 3. Enviamos los bytes que ya tenemos guardados en la variable a Amazon
+                    $resultado = $rekognition->detectText([
+                        'Image' => [
+                            'Bytes' => $imagenBytes, // <-- Usamos la variable, no el path vacío
+                        ],
+                    ]);
 
-                // 3. Filtras y buscas los carnets de los resultados de la IA
-                // ...
+                    // 4. Juntamos el texto
+                    $textoPlano = '';
+                    foreach ($resultado['TextDetections'] as $deteccion) {
+                        if ($deteccion['Type'] === 'LINE') {
+                            $textoPlano .= $deteccion['DetectedText'] . " \n";
+                        }
+                    }
+
+                    $regexCarnet = '/\d{4}\s*-\s*\d{2}\s*-\s*\d+/';
+
+                    preg_match_all($regexCarnet, $textoPlano, $matches);
+
+                    if (!empty($matches[0])) {
+                        foreach ($matches[0] as $match) {
+                            $carnetLimpio = preg_replace('/[^0-9-]/', '', $match);
+                            $identificadoresEncontrados[] = ['tipo' => 'carnet', 'valor' => $carnetLimpio];
+                        }
+                    }
+
+                    // 6. CAZADOR DE CORREOS
+                    preg_match_all('/[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}/', $textoPlano, $matchesCorreos);
+                    if (!empty($matchesCorreos[0])) {
+                        foreach ($matchesCorreos[0] as $match) {
+                            $identificadoresEncontrados[] = ['tipo' => 'email', 'valor' => strtolower(trim($match))];
+                        }
+                    }
+
+                } catch (AwsException $e) {
+                    Log::error("Error de AWS Rekognition procesando imagen: " . $e->getMessage());
+                }
             }
         }
 
-        return empty($carnetsExtraidos) ? [] : User::whereIn('carnet', $carnetsExtraidos)->pluck('id')->toArray();
+        if (empty($identificadoresEncontrados)) return [];
+
+        $carnets = collect($identificadoresEncontrados)->where('tipo', 'carnet')->pluck('valor')->unique()->toArray();
+        $emails  = collect($identificadoresEncontrados)->where('tipo', 'email')->pluck('valor')->unique()->toArray();
+
+        return User::whereIn('carnet', $carnets)
+            ->orWhereIn('email', $emails)
+            ->pluck('id')
+            ->toArray();
     }
 
 }
