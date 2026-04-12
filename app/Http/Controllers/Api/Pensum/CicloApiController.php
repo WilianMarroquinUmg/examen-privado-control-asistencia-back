@@ -103,13 +103,16 @@ class CicloApiController extends AppbaseController implements HasMiddleware
     public function asignarCurso(Request $request): JsonResponse
     {
         $request->validate([
+            'facultad_id' => 'required|exists:facultades,id',
             'ciclo_id' => 'required|exists:ciclos,id',
             'curso_id' => 'required|exists:cursos,id',
         ]);
 
         $ciclo = Ciclo::findOrFail($request->ciclo_id);
 
-        $ciclo->cursos()->attach($request->curso_id);
+        $ciclo->cursos()->attach($request->curso_id, [
+            'facultad_id' => $request->facultad_id
+        ]);
 
         return $this->sendSuccess('Cursos asignados al ciclo con éxito.');
     }

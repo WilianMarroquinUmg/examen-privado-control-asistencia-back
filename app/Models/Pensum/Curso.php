@@ -93,18 +93,10 @@ class Curso extends Model
 
     public function ciclos(): BelongsToMany
     {
-        return $this->belongsToMany(
-            Ciclo::class,
-            'ciclos_has_cursos',
-            'cursos_id',
-            'ciclos_id'
-        );
+        return $this->belongsToMany(Ciclo::class, 'ciclos_has_cursos', 'curso_id', 'ciclo_id')
+            ->withPivot('facultad_id'); // 🚀 Esto es clave para poder filtrar por facultad
     }
 
-    /**
-     * SCOPE 1: Traer cursos que NO están asociados a esta facultad y ciclo
-     * Ideal para el SelectorPro al momento de agregar un curso nuevo.
-     */
     /**
      * Trae los cursos que NO están asociados a un ciclo que pertenece a una facultad específica.
      * $facultadYCiclo viene como string "facultadId,cicloId" (ej. "1,5")
@@ -114,17 +106,15 @@ class Curso extends Model
         $ids = explode('-', $facultadYCiclo);
 
         if (count($ids) !== 2) {
-            return $query; // Si viene mal formado, regresamos la consulta sin filtrar para que no truene
+            return $query;
         }
 
         $facultadId = $ids[0];
         $cicloId = $ids[1];
 
-        return $query->whereDoesntHave('ciclos', function (Builder $queryCiclo) use ($cicloId, $facultadId) {
-            $queryCiclo->where('ciclos.id', $cicloId)
-                ->whereHas('facultades', function (Builder $queryFacultad) use ($facultadId) {
-                    $queryFacultad->where('facultades.id', $facultadId);
-                });
+        return $query->whereDoesntHave('ciclos', function ($q) use ($cicloId, $facultadId) {
+            $q->where('ciclo_id', $cicloId)
+            ->where('facultad_id', $facultadId);
         });
     }
 
@@ -134,26 +124,17 @@ class Curso extends Model
      */
     public function scopeAsociadosACicloYFacultad(Builder $query, $facultadYCiclo)
     {
-        // 1. Separamos el string por la coma
         $ids = explode('-', $facultadYCiclo);
 
-        // 2. Validamos que vengan exactamente los dos datos (Facultad y Ciclo)
-        if (count($ids) !== 2) {
-            return $query; // Si viene mal formado, regresamos la consulta sin alterar
-        }
+        if (count($ids) !== 2) return $query;
+
         $facultadId = $ids[0];
         $cicloId = $ids[1];
 
-        // 3. Eloquent puro: "Trae el curso si tiene este ciclo asociado a esta facultad"
-        return $query->whereHas('ciclos', function (Builder $queryCiclo) use ($cicloId, $facultadId) {
-
-            // Verificamos que el curso esté en este ciclo específico
-            $queryCiclo->where('ciclos.id', $cicloId)
-
-                // Y además verificamos que ese ciclo pertenezca a la facultad específica
-                ->whereHas('facultades', function (Builder $queryFacultad) use ($facultadId) {
-                    $queryFacultad->where('facultades.id', $facultadId);
-                });
+        // Usamos whereHas para filtrar por la tabla pivote
+        return $query->whereHas('ciclos', function ($q) use ($cicloId, $facultadId) {
+            $q->where('ciclo_id', $cicloId) // Filtramos por el ID del ciclo
+            ->where('facultad_id', $facultadId); // 🎯 Filtramos por la facultad en la misma tabla
         });
     }
 

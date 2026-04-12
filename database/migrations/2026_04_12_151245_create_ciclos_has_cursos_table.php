@@ -12,10 +12,11 @@ return new class extends Migration
     public function up(): void
     {
         Schema::create('ciclos_has_cursos', function (Blueprint $table) {
-            $table->unsignedBigInteger('ciclos_id')->index('fk_ciclos_has_cursos_ciclos1_idx');
-            $table->unsignedBigInteger('cursos_id')->index('fk_ciclos_has_cursos_cursos1_idx');
+            $table->unsignedBigInteger('facultad_id');
+            $table->unsignedBigInteger('ciclo_id')->index('fk_ciclos_has_cursos_ciclos1_idx');
+            $table->unsignedBigInteger('curso_id')->index('fk_ciclos_has_cursos_cursos1_idx');
 
-            $table->primary(['ciclos_id', 'cursos_id']);
+            $table->primary(['facultad_id', 'ciclo_id', 'curso_id'], 'pk_facultad_ciclo_curso');
         });
     }
 

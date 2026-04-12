@@ -94,10 +94,9 @@ class Ciclo extends Model
         return $this->belongsToMany(
             Curso::class,
             'ciclos_has_cursos',
-            'ciclos_id',
-            'cursos_id'
-        );
-
+            'ciclo_id',
+            'curso_id'
+        )->withPivot('facultad_id');
     }
 
     public function scopeSinAsociarAFacultad($query, $facultadId)
