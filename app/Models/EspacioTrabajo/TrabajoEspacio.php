@@ -3,12 +3,20 @@
 namespace App\Models\EspacioTrabajo;
 
 
+use App\Models\Pensum\Ciclo;
+use App\Models\Pensum\Curso;
+use App\Models\Pensum\Facultad;
+use App\Models\User;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Spatie\MediaLibrary\HasMedia;
+use Spatie\MediaLibrary\InteractsWithMedia;
 
 /**
- * 
+ *
  *
  * @property int $id
  * @property int $catedratico_id
@@ -34,22 +42,22 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
  * @method static \Illuminate\Database\Eloquent\Builder<static>|TrabajoEspacio withoutTrashed()
  * @mixin \Eloquent
  */
-class TrabajoEspacio extends Model
+class TrabajoEspacio extends Model implements HasMedia
 {
 
     use SoftDeletes;
     use HasFactory;
+    use InteractsWithMedia;
 
     protected $table = 'trabajo_espacios';
 
 
-    protected $fillable =
-        [
-    'catedratico_id',
-    'facultad_id',
-    'ciclo_id',
-    'curso_id'
-];
+    protected $fillable = [
+            'catedratico_id',
+            'facultad_id',
+            'ciclo_id',
+            'curso_id'
+        ];
 
 
     /**
@@ -59,16 +67,15 @@ class TrabajoEspacio extends Model
      */
     protected $casts =
         [
-        'id' => 'integer',
-        'catedratico_id' => 'integer',
-        'facultad_id' => 'integer',
-        'ciclo_id' => 'integer',
-        'curso_id' => 'integer',
-        'created_at' => 'timestamp',
-        'updated_at' => 'timestamp',
-        'deleted_at' => 'timestamp',
-    ];
-
+            'id' => 'integer',
+            'catedratico_id' => 'integer',
+            'facultad_id' => 'integer',
+            'ciclo_id' => 'integer',
+            'curso_id' => 'integer',
+            'created_at' => 'timestamp',
+            'updated_at' => 'timestamp',
+            'deleted_at' => 'timestamp',
+        ];
 
 
     /**
@@ -77,12 +84,12 @@ class TrabajoEspacio extends Model
      * @var array
      */
     public static $rules =
-    [
-    'catedratico_id' => 'required|integer',
-    'facultad_id' => 'required|integer',
-    'ciclo_id' => 'required|integer',
-    'curso_id' => 'required|integer',
-];
+        [
+            'catedratico_id' => 'required|integer',
+            'facultad_id' => 'required|integer',
+            'ciclo_id' => 'required|integer',
+            'curso_id' => 'required|integer',
+        ];
 
 
     /**
@@ -90,7 +97,7 @@ class TrabajoEspacio extends Model
      *
      * @var array
      */
-    public static $messages =[
+    public static $messages = [
 
     ];
 
@@ -100,24 +107,33 @@ class TrabajoEspacio extends Model
      *
      * @var array
      */
-    public function ciclo()
+    public function ciclo(): BelongsTo
     {
-    return $this->belongsTo(Ciclo::class,'ciclo_id','id');
+        return $this->belongsTo(Ciclo::class, 'ciclo_id', 'id');
     }
 
-    public function curso()
+    public function curso(): BelongsTo
     {
-    return $this->belongsTo(Curso::class,'curso_id','id');
+        return $this->belongsTo(Curso::class, 'curso_id', 'id');
     }
 
-    public function facultade()
+    public function facultad(): BelongsTo
     {
-    return $this->belongsTo(Facultade::class,'facultad_id','id');
+        return $this->belongsTo(Facultad::class, 'facultad_id', 'id');
     }
 
-    public function user()
+    public function catedratico(): BelongsTo
     {
-    return $this->belongsTo(User::class,'catedratico_id','id');
+        return $this->belongsTo(User::class, 'catedratico_id', 'id');
     }
 
+    public function alumnos(): BelongsToMany
+    {
+        return $this->belongsToMany(
+            User::class,
+            'trabajo_espacios_has_alumnos',
+            'trabajo_espacios_id',
+            'users_id'
+        );
+    }
 }

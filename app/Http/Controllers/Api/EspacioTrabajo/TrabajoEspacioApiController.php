@@ -3,6 +3,9 @@
 namespace App\Http\Controllers\Api\EspacioTrabajo;
 
 use App\Http\Controllers\AppBaseController;
+use App\Models\User;
+use App\Traits\EspacioTrabajoTrait;
+use Exception;
 use Illuminate\Routing\Controllers\HasMiddleware;
 use Illuminate\Routing\Controllers\Middleware;
 use App\Http\Requests\Api\EspacioTrabajo\CreateTrabajoEspacioApiRequest;
@@ -10,6 +13,8 @@ use App\Http\Requests\Api\EspacioTrabajo\UpdateTrabajoEspacioApiRequest;
 use App\Models\EspacioTrabajo\TrabajoEspacio;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
 use Spatie\QueryBuilder\QueryBuilder;
 
 /**
@@ -18,6 +23,7 @@ use Spatie\QueryBuilder\QueryBuilder;
 class TrabajoEspacioApiController extends AppbaseController implements HasMiddleware
 {
 
+    use EspacioTrabajoTrait;
     /**
      * @return array
      */
@@ -62,13 +68,62 @@ class TrabajoEspacioApiController extends AppbaseController implements HasMiddle
      * Store a newly created TrabajoEspacio in storage.
      * POST /trabajo_espacios
      */
-    public function store(CreateTrabajoEspacioApiRequest $request): JsonResponse
+
+    public function store(Request $request): JsonResponse
     {
-        $input = $request->all();
+        DB::beginTransaction();
 
-        $trabajo_espacios = TrabajoEspacio::create($input);
+        try {
+            $espacio = TrabajoEspacio::create([
+                'facultad_id'      => $request->input('facultad_id'),
+                'ciclo_id'         => $request->input('ciclo_id'),
+                'curso_id'         => $request->input('curso_id'),
+                'catedratico_id'   => Auth::id(),
+            ]);
 
-        return $this->sendResponse($trabajo_espacios->toArray(), 'TrabajoEspacio creado con éxito.');
+            $datosInscripcion = $request->all()['alumnos'] ?? [];
+            $todosLosAlumnosIds = [];
+
+            foreach ($datosInscripcion as $item) {
+                $tipo = $item['tipoInscripcion'] ?? null;
+
+                switch ($tipo) {
+                    case 'manual':
+                        $idsExtraidos = $this->extraerManual($item['alumnos'] ?? []);
+                        $todosLosAlumnosIds = array_merge($todosLosAlumnosIds, $idsExtraidos);
+                        break;
+
+                    case 'excel':
+                        $idsExtraidos = $this->extraerDeExcel($espacio, $item['documento'] ?? []);
+                        $todosLosAlumnosIds = array_merge($todosLosAlumnosIds, $idsExtraidos);
+                        break;
+
+                    case 'pdf':
+                        $idsExtraidos = $this->extraerDePdf($espacio, $item['documento'] ?? []);
+                        $todosLosAlumnosIds = array_merge($todosLosAlumnosIds, $idsExtraidos);
+                        break;
+
+                    case 'ia':
+                        $idsExtraidos = $this->extraerConIA($espacio, $item['documento'] ?? []);
+                        $todosLosAlumnosIds = array_merge($todosLosAlumnosIds, $idsExtraidos);
+                        break;
+                }
+            }
+
+            $todosLosAlumnosIds = array_unique($todosLosAlumnosIds);
+
+            if (!empty($todosLosAlumnosIds)) {
+                $espacio->alumnos()->syncWithoutDetaching($todosLosAlumnosIds);
+            }
+
+            DB::commit();
+
+            return $this->sendSuccess('Inscripción procesada con éxito.');
+
+        } catch (Exception $e) {
+            DB::rollBack();
+            return $this->sendError('Error al procesar la inscripción: ' . $e->getMessage());
+        }
     }
 
     /**
