@@ -10,6 +10,7 @@ use App\Http\Requests\Api\Pensum\UpdateCursoApiRequest;
 use App\Models\Pensum\Curso;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
+use Spatie\QueryBuilder\AllowedFilter;
 use Spatie\QueryBuilder\QueryBuilder;
 
 /**
@@ -40,15 +41,17 @@ class CursoApiController extends AppbaseController implements HasMiddleware
     {
         $cursos = QueryBuilder::for(Curso::class)
             ->allowedFilters([
-    'nombre',
-    'codigo',
-    'identificacion_institucional'
-])
+                'nombre',
+                'codigo',
+                'identificacion_institucional',
+                AllowedFilter::scope('sinAsociarACicloYFacultad', 'sinAsociarACicloYFacultad'),
+                AllowedFilter::scope('asociadosACicloYFacultad', 'AsociadosACicloYFacultad'),
+            ])
             ->allowedSorts([
-    'nombre',
-    'codigo',
-    'identificacion_institucional'
-])
+                'nombre',
+                'codigo',
+                'identificacion_institucional'
+            ])
             ->defaultSort('-id') // Ordenar por defecto por fecha descendente
             ->Paginate(request('page.size') ?? 10);
 
@@ -79,9 +82,9 @@ class CursoApiController extends AppbaseController implements HasMiddleware
     }
 
     /**
-    * Update the specified Curso in storage.
-    * PUT/PATCH /cursos/{id}
-    */
+     * Update the specified Curso in storage.
+     * PUT/PATCH /cursos/{id}
+     */
     public function update(UpdateCursoApiRequest $request, $id): JsonResponse
     {
         $curso = Curso::findOrFail($id);
@@ -90,9 +93,9 @@ class CursoApiController extends AppbaseController implements HasMiddleware
     }
 
     /**
-    * Remove the specified Curso from storage.
-    * DELETE /cursos/{id}
-    */
+     * Remove the specified Curso from storage.
+     * DELETE /cursos/{id}
+     */
     public function destroy(Curso $curso): JsonResponse
     {
         $curso->delete();

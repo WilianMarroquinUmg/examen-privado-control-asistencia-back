@@ -3,12 +3,13 @@
 namespace App\Models\Pensum;
 
 
+use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
-use Illuminate\Database\Eloquent\Factories\HasFactory;
 
 /**
- * 
+ *
  *
  * @property int $id
  * @property string $nombre
@@ -89,12 +90,51 @@ class Curso extends Model
 
     ];
 
-
     /**
      * Accessor for relationships
      *
      * @var array
      */
-    
+
+    // Relación hacia la tabla donde se asignan los cursos
+    public function asignaciones()
+    {
+        return $this->hasMany(FacultadCicloCurso::class, 'cursos_id');
+    }
+
+    /**
+     * SCOPE 1: Traer cursos que NO están asociados a esta facultad y ciclo
+     * Ideal para el SelectorPro al momento de agregar un curso nuevo.
+     */
+    public function scopeSinAsociarACicloYFacultad(Builder $query, $facultadId = null, $cicloId = null)
+    {
+        // Validación de seguridad por si falla el frontend y no manda ambos datos
+        if (!$facultadId || !$cicloId) return $query;
+
+        return $query->whereDoesntHave('asignaciones', function (Builder $queryAsignacion) use ($facultadId, $cicloId) {
+            $queryAsignacion->whereHas('facultadCiclo', function (Builder $queryFacultadCiclo) use ($facultadId, $cicloId) {
+                $queryFacultadCiclo->where('facultades_id', $facultadId)
+                    ->where('ciclos_id', $cicloId);
+            });
+        });
+    }
+
+    /**
+     * SCOPE 2: Traer cursos que SÍ están asociados a esta facultad y ciclo
+     * Ideal para cargar la lista principal del pénsum.
+     */
+    public function scopeAsociadosACicloYFacultad(Builder $query, $facultadId = null, $cicloId = null)
+    {
+        // Validación de seguridad
+        if (!$facultadId || !$cicloId) return $query;
+
+        return $query->whereHas('asignaciones', function (Builder $queryAsignacion) use ($facultadId, $cicloId) {
+            $queryAsignacion->whereHas('facultadCiclo', function (Builder $queryFacultadCiclo) use ($facultadId, $cicloId) {
+                $queryFacultadCiclo->where('facultades_id', $facultadId)
+                    ->where('ciclos_id', $cicloId);
+            });
+        });
+    }
+
 
 }
