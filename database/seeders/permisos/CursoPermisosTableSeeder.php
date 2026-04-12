@@ -27,7 +27,7 @@ class CursoPermisosTableSeeder extends Seeder
             Permission::create([
                 'name' => $permiso,
                 'subject' => 'Curso',
-                'guard_name' => 'api',
+                'guard_name' => 'web',
             ]);
         }
 

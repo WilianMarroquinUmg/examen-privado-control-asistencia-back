@@ -19,9 +19,7 @@ return new class extends Migration
             $table->string('cantidad_tomas_requeridas', 45);
             $table->integer('minutos_tolerancia');
             $table->unsignedBigInteger('catedratico_id')->index('fk_asistencia_configuraciones_users1_idx');
-            $table->unsignedBigInteger('facultad_id')->index('fk_configuraciones_facultad_idx');
-            $table->unsignedBigInteger('ciclo_id')->index('fk_configuraciones_ciclo_idx');
-            $table->unsignedBigInteger('curso_id')->index('fk_configuraciones_curso_idx');
+            $table->unsignedBigInteger('espacio_id')->index('fk_asistencia_configuraciones_trabajo_espacios1_idx');
             $table->timestamps();
             $table->softDeletes();
 

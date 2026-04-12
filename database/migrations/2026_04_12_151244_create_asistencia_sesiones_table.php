@@ -15,10 +15,7 @@ return new class extends Migration
             $table->bigInteger('id')->primary();
             $table->date('fecha');
             $table->enum('estado', ['En curso', 'Finalizada']);
-            $table->unsignedBigInteger('catedratico_id')->index('fk_asistencia_sessiones_users1_idx');
-            $table->unsignedBigInteger('facultad_id')->index('fk_asistencia_sessiones_facultad_idx');
-            $table->unsignedBigInteger('ciclo_id')->index('fk_asistencia_sessiones_ciclo_idx');
-            $table->unsignedBigInteger('curso_id')->index('fk_asistencia_sessiones_curso_idx');
+            $table->unsignedBigInteger('espacio_id')->index('fk_asistencia_sesiones_trabajo_espacios1_idx');
             $table->timestamps();
             $table->softDeletes();
         });

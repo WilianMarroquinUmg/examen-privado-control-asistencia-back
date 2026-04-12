@@ -27,7 +27,7 @@ class CicloPermisosTableSeeder extends Seeder
             Permission::create([
                 'name' => $permiso,
                 'subject' => 'Ciclo',
-                'guard_name' => 'api',
+                'guard_name' => 'web',
             ]);
         }
 
