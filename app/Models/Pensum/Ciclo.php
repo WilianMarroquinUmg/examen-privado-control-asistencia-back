@@ -84,7 +84,7 @@ class Ciclo extends Model
     {
         return $this->belongsToMany(
             Facultad::class,
-            'facultad_ciclos',
+            'facultades_has_ciclos',
             'ciclos_id',
             'facultades_id'
         );

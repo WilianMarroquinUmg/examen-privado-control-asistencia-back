@@ -2,6 +2,7 @@
 
 namespace Database\Seeders\Pensum;
 
+use App\Models\Pensum\Facultad;
 use Illuminate\Database\Seeder;
 
 class FacultadTableSeeder extends Seeder
@@ -13,6 +14,27 @@ class FacultadTableSeeder extends Seeder
      */
     public function run()
     {
-        //agregar la logica para crear registros en la tabla
+
+        $facultades = [
+            ['nombre' => 'Ciencias Médicas', 'codigo' => '002'],
+            ['nombre' => 'Ciencias Jurídicas y Sociales', 'codigo' => '003'],
+            ['nombre' => 'Arquitectura y Diseño', 'codigo' => '004'],
+            ['nombre' => 'Ciencias Económicas y Empresariales', 'codigo' => '005'],
+            ['nombre' => 'Humanidades y Educación', 'codigo' => '006'],
+            ['nombre' => 'Ciencias Agrícolas y Ambientales', 'codigo' => '007'],
+            ['nombre' => 'Odontología', 'codigo' => '008'],
+            ['nombre' => 'Ciencias Químicas y Farmacia', 'codigo' => '009'],
+            ['nombre' => 'Psicología Clínica', 'codigo' => '010'],
+            ['nombre' => 'Ingeniería Civil', 'codigo' => '011'],
+        ];
+
+        foreach ($facultades as $facultad) {
+            Facultad::firstOrCreate([
+                'codigo' => $facultad['codigo']
+            ], [
+                'nombre' => $facultad['nombre']
+            ]);
+        }
+
     }
 }

@@ -91,48 +91,59 @@ class Curso extends Model
     ];
 
     /**
-     * Accessor for relationships
-     *
-     * @var array
-     */
-
-    // Relación hacia la tabla donde se asignan los cursos
-    public function asignaciones()
-    {
-        return $this->hasMany(FacultadCicloCurso::class, 'cursos_id');
-    }
-
-    /**
      * SCOPE 1: Traer cursos que NO están asociados a esta facultad y ciclo
      * Ideal para el SelectorPro al momento de agregar un curso nuevo.
      */
-    public function scopeSinAsociarACicloYFacultad(Builder $query, $facultadId = null, $cicloId = null)
+    /**
+     * Trae los cursos que NO están asociados a un ciclo que pertenece a una facultad específica.
+     * $facultadYCiclo viene como string "facultadId,cicloId" (ej. "1,5")
+     */
+    public function scopeSinAsociarACicloYFacultad(Builder $query, $facultadYCiclo)
     {
-        // Validación de seguridad por si falla el frontend y no manda ambos datos
-        if (!$facultadId || !$cicloId) return $query;
+        $ids = explode(',', $facultadYCiclo);
 
-        return $query->whereDoesntHave('asignaciones', function (Builder $queryAsignacion) use ($facultadId, $cicloId) {
-            $queryAsignacion->whereHas('facultadCiclo', function (Builder $queryFacultadCiclo) use ($facultadId, $cicloId) {
-                $queryFacultadCiclo->where('facultades_id', $facultadId)
-                    ->where('ciclos_id', $cicloId);
-            });
+        if (count($ids) !== 2) {
+            return $query; // Si viene mal formado, regresamos la consulta sin filtrar para que no truene
+        }
+
+        $facultadId = $ids[0];
+        $cicloId = $ids[1];
+
+        return $query->whereDoesntHave('ciclos', function (Builder $queryCiclo) use ($cicloId, $facultadId) {
+            $queryCiclo->where('ciclos.id', $cicloId)
+                ->whereHas('facultades', function (Builder $queryFacultad) use ($facultadId) {
+                    $queryFacultad->where('facultades.id', $facultadId);
+                });
         });
     }
 
     /**
-     * SCOPE 2: Traer cursos que SÍ están asociados a esta facultad y ciclo
-     * Ideal para cargar la lista principal del pénsum.
+     * Trae los cursos que SÍ están asociados a un ciclo que pertenece a una facultad específica.
+     * $facultadYCiclo viene como string "facultadId,cicloId" (ej. "1,5")
      */
-    public function scopeAsociadosACicloYFacultad(Builder $query, $facultadId = null, $cicloId = null)
+    public function scopeAsociadosACicloYFacultad(Builder $query, $facultadYCiclo)
     {
-        // Validación de seguridad
-        if (!$facultadId || !$cicloId) return $query;
+        // 1. Separamos el string por la coma
+        $ids = explode(',', $facultadYCiclo);
 
-        return $query->whereHas('asignaciones', function (Builder $queryAsignacion) use ($facultadId, $cicloId) {
-            $queryAsignacion->whereHas('facultadCiclo', function (Builder $queryFacultadCiclo) use ($facultadId, $cicloId) {
-                $queryFacultadCiclo->where('facultades_id', $facultadId)
-                    ->where('ciclos_id', $cicloId);
-            });
+        // 2. Validamos que vengan exactamente los dos datos (Facultad y Ciclo)
+        if (count($ids) !== 2) {
+            return $query; // Si viene mal formado, regresamos la consulta sin alterar
+        }
+
+        $facultadId = $ids[0];
+        $cicloId = $ids[1];
+
+        // 3. Eloquent puro: "Trae el curso si tiene este ciclo asociado a esta facultad"
+        return $query->whereHas('ciclos', function (Builder $queryCiclo) use ($cicloId, $facultadId) {
+
+            // Verificamos que el curso esté en este ciclo específico
+            $queryCiclo->where('ciclos.id', $cicloId)
+
+                // Y además verificamos que ese ciclo pertenezca a la facultad específica
+                ->whereHas('facultades', function (Builder $queryFacultad) use ($facultadId) {
+                    $queryFacultad->where('facultades.id', $facultadId);
+                });
         });
     }
 

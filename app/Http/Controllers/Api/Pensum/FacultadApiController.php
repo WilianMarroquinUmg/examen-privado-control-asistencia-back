@@ -40,13 +40,13 @@ class FacultadApiController extends AppbaseController implements HasMiddleware
     {
         $facultades = QueryBuilder::for(Facultad::class)
             ->allowedFilters([
-    'nombre',
-    'codigo'
-])
+                'nombre',
+                'codigo'
+            ])
             ->allowedSorts([
-    'nombre',
-    'codigo'
-])
+                'nombre',
+                'codigo'
+            ])
             ->defaultSort('-id') // Ordenar por defecto por fecha descendente
             ->Paginate(request('page.size') ?? 10);
 
@@ -77,9 +77,9 @@ class FacultadApiController extends AppbaseController implements HasMiddleware
     }
 
     /**
-    * Update the specified Facultad in storage.
-    * PUT/PATCH /facultades/{id}
-    */
+     * Update the specified Facultad in storage.
+     * PUT/PATCH /facultades/{id}
+     */
     public function update(UpdateFacultadApiRequest $request, $id): JsonResponse
     {
         $facultad = Facultad::findOrFail($id);
@@ -88,9 +88,9 @@ class FacultadApiController extends AppbaseController implements HasMiddleware
     }
 
     /**
-    * Remove the specified Facultad from storage.
-    * DELETE /facultades/{id}
-    */
+     * Remove the specified Facultad from storage.
+     * DELETE /facultades/{id}
+     */
     public function destroy(Facultad $facultad): JsonResponse
     {
         $facultad->delete();

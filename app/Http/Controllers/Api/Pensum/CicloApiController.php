@@ -49,7 +49,6 @@ class CicloApiController extends AppbaseController implements HasMiddleware
             ->allowedSorts([
                 'nombre'
             ])
-            ->defaultSort('-id') // Ordenar por defecto por fecha descendente
             ->Paginate(request('page.size') ?? 10);
 
         return $this->sendResponse($ciclos, 'ciclos recuperados con éxito.');
