@@ -94,6 +94,8 @@ class CicloApiController extends AppbaseController implements HasMiddleware
      */
     public function destroy(Ciclo $ciclo): JsonResponse
     {
+        $ciclo->cursos()->detach();
+
         $ciclo->delete();
         return $this->sendResponse(null, 'Ciclo eliminado con éxito.');
     }

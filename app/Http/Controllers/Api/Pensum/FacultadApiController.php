@@ -93,6 +93,9 @@ class FacultadApiController extends AppbaseController implements HasMiddleware
      */
     public function destroy(Facultad $facultad): JsonResponse
     {
+
+        $facultad->ciclos()->detach();
+
         $facultad->delete();
         return $this->sendResponse(null, 'Facultad eliminado con éxito.');
     }
