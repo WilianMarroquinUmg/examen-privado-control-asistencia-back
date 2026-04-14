@@ -107,9 +107,10 @@ class AsistenciaSesionApiController extends AppbaseController implements HasMidd
      * Display the specified AsistenciaSesion.
      * GET|HEAD /asistencia_sesiones/{id}
      */
-    public function show(AsistenciaSesion $asistenciasesion)
+    public function show(AsistenciaSesion $asistencia_sesione)
     {
-        return $this->sendResponse($asistenciasesion->toArray(), 'AsistenciaSesion recuperado con éxito.');
+        $asistencia_sesione->load('tomas', 'configuration');
+        return $this->sendResponse($asistencia_sesione->toArray(), 'AsistenciaSesion recuperado con éxito.');
     }
 
     /**
@@ -127,9 +128,9 @@ class AsistenciaSesionApiController extends AppbaseController implements HasMidd
      * Remove the specified AsistenciaSesion from storage.
      * DELETE /asistencia_sesiones/{id}
      */
-    public function destroy(AsistenciaSesion $asistenciasesion): JsonResponse
+    public function destroy(AsistenciaSesion $asistencia_sesione): JsonResponse
     {
-        $asistenciasesion->delete();
+        $asistencia_sesione->delete();
         return $this->sendResponse(null, 'AsistenciaSesion eliminado con éxito.');
     }
 }

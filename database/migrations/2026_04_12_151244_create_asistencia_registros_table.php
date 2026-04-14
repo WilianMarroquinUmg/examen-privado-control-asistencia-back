@@ -14,10 +14,10 @@ return new class extends Migration
         Schema::create('asistencia_registros', function (Blueprint $table) {
             $table->bigIncrements('id')->unique('id_unique');
             $table->time('hora_registro');
-            $table->decimal('latitud', 10, 8)->nullable();
-            $table->decimal('longitud', 10, 8)->nullable();
+            $table->string('latitud', 50)->nullable();
+            $table->string('longitud', 50)->nullable();
             $table->string('foto_evidencia_url', 120)->nullable();
-            $table->decimal('aws_liveness_score', 10, 0)->nullable();
+            $table->float('aws_liveness_score')->nullable();
             $table->tinyInteger('fue_aprobada');
             $table->unsignedBigInteger('toma_asistencia_id')->index('fk_asistencia_registros_asistencia_sesion_tomas1_idx');
             $table->unsignedBigInteger('alumno_id')->index('fk_asistencia_registros_users1_idx');

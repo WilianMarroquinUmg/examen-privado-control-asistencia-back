@@ -18,8 +18,8 @@ return new class extends Migration
             $table->string('codito_otp', 10)->nullable();
             $table->integer('numero_toma');
             $table->unsignedBigInteger('sesion_id')->index('fk_asistencia_sesion_tomas_asistencia_sessiones1_idx');
-            $table->decimal('longitud_origen', 10, 8)->nullable();
-            $table->decimal('latitud_origen', 10, 8)->nullable();
+            $table->string('longitud_origen', 50)->nullable();
+            $table->string('latitud_origen', 50)->nullable();
             $table->timestamps();
             $table->softDeletes();
         });

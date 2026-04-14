@@ -103,4 +103,16 @@ class AsistenciaSesion extends Model
         return $this->belongsTo(TrabajoEspacio::class, 'espacio_id', 'id');
     }
 
+    public function configuration(): BelongsTo
+    {
+        return $this->belongsTo(AsistenciaConfiguracion::class, 'configuracion_id', 'id');
+
+    }
+
+    public function tomas()
+    {
+        return $this->hasMany(AsistenciaSesionToma::class, 'sesion_id', 'id');
+
+    }
+
 }

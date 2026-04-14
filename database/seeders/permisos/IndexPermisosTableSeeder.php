@@ -22,6 +22,7 @@ class IndexPermisosTableSeeder extends Seeder
             TrabajoEspacioPermisosTableSeeder::class,
             AsistenciaConfiguracionPermisosTableSeeder::class,
             AsistenciaSesionPermisosTableSeeder::class,
+            AsistenciaSesionTomaPermisosTableSeeder::class,
         ]);
 
     }
