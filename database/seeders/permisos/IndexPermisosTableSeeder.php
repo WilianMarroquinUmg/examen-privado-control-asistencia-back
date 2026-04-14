@@ -23,6 +23,7 @@ class IndexPermisosTableSeeder extends Seeder
             AsistenciaConfiguracionPermisosTableSeeder::class,
             AsistenciaSesionPermisosTableSeeder::class,
             AsistenciaSesionTomaPermisosTableSeeder::class,
+            AsistenciaRegistroPermisosTableSeeder::class,
         ]);
 
     }

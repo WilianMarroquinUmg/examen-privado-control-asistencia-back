@@ -42,6 +42,10 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::apiResource('asistencia_sesion_tomas', App\Http\Controllers\Api\AsistenciaSesionTomaApiController::class)
         ->parameters(['asistencia_sesion_tomas' => 'asistenciasesiontoma']);
 
+
+    Route::apiResource('asistencia-registros', App\Http\Controllers\Api\AsistenciaRegistroApiController::class)
+        ->parameters(['asistencia_registros' => 'asistenciaregistro']);
+
 });
 
 require __DIR__.'/auth.php';
@@ -51,6 +55,7 @@ Route::prefix('libres')->group(function () {
     require __DIR__.'/admin/Configuraciones/api_libres.php';
 
 });
+
 
 
 
