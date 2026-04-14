@@ -9,7 +9,7 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 
 /**
- *
+ * 
  *
  * @property int $id
  * @property string $nombre
@@ -27,6 +27,12 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
  * @method static \Illuminate\Database\Eloquent\Builder<static>|Ciclo whereUpdatedAt($value)
  * @method static \Illuminate\Database\Eloquent\Builder<static>|Ciclo withTrashed()
  * @method static \Illuminate\Database\Eloquent\Builder<static>|Ciclo withoutTrashed()
+ * @property-read \Illuminate\Database\Eloquent\Collection<int, \App\Models\Pensum\Curso> $cursos
+ * @property-read int|null $cursos_count
+ * @property-read \Illuminate\Database\Eloquent\Collection<int, \App\Models\Pensum\Facultad> $facultades
+ * @property-read int|null $facultades_count
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|Ciclo asociadosAFacultad($facultadId)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|Ciclo sinAsociarAFacultad($facultadId)
  * @mixin \Eloquent
  */
 class Ciclo extends Model

@@ -45,6 +45,20 @@ use Spatie\MediaLibrary\InteractsWithMedia;
  * @method static \Illuminate\Database\Eloquent\Builder<static>|TrabajoEspacio whereUpdatedAt($value)
  * @method static \Illuminate\Database\Eloquent\Builder<static>|TrabajoEspacio withTrashed()
  * @method static \Illuminate\Database\Eloquent\Builder<static>|TrabajoEspacio withoutTrashed()
+ * @property string $estado
+ * @property-read \Illuminate\Database\Eloquent\Collection<int, User> $alumnos
+ * @property-read int|null $alumnos_count
+ * @property-read User $catedratico
+ * @property-read Ciclo $ciclo
+ * @property-read Curso $curso
+ * @property-read Facultad $facultad
+ * @property-read int $cantidad_alumnos
+ * @property-read \Spatie\MediaLibrary\MediaCollections\Models\Collections\MediaCollection<int, \Spatie\MediaLibrary\MediaCollections\Models\Media> $media
+ * @property-read int|null $media_count
+ * @property-read \Illuminate\Database\Eloquent\Collection<int, AsistenciaSesion> $sesiones
+ * @property-read int|null $sesiones_count
+ * @method static Builder<static>|TrabajoEspacio buscar($busqueda)
+ * @method static Builder<static>|TrabajoEspacio whereEstado($value)
  * @mixin \Eloquent
  */
 class TrabajoEspacio extends Model implements HasMedia
@@ -59,6 +73,7 @@ class TrabajoEspacio extends Model implements HasMedia
 
     protected $fillable = [
             'catedratico_id',
+            'estado',
             'facultad_id',
             'ciclo_id',
             'curso_id'
@@ -107,6 +122,9 @@ class TrabajoEspacio extends Model implements HasMedia
 
     ];
 
+    const PENDIENTE = 'Pendiente';
+    const ACTIVO = 'Activo';
+    const FINALIZADO = 'Finalizado';
 
     /**
      * Accessor for relationships
@@ -141,12 +159,6 @@ class TrabajoEspacio extends Model implements HasMedia
             'trabajo_espacios_id',
             'users_id'
         );
-    }
-
-    public function configuration(): HasOne
-    {
-        return $this->hasOne(AsistenciaConfiguracion::class, 'espacio_id', 'id');
-
     }
 
     public function sesiones(): HasMany

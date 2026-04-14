@@ -8,7 +8,7 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 
 /**
- *
+ * 
  *
  * @property int $id
  * @property string $name
@@ -25,6 +25,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
  * @method static \Illuminate\Database\Eloquent\Builder<static>|Permission whereName($value)
  * @method static \Illuminate\Database\Eloquent\Builder<static>|Permission whereSubject($value)
  * @method static \Illuminate\Database\Eloquent\Builder<static>|Permission whereUpdatedAt($value)
+ * @property-read mixed $name_y_subject
  * @mixin \Eloquent
  */
 class Permission extends Model

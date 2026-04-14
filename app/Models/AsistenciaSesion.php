@@ -3,12 +3,14 @@
 namespace App\Models;
 
 
+use App\Models\EspacioTrabajo\TrabajoEspacio;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 
 /**
- * 
+ *
  *
  * @property int $id
  * @property \Illuminate\Support\Carbon $fecha
@@ -30,6 +32,8 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
  * @method static \Illuminate\Database\Eloquent\Builder<static>|AsistenciaSesion whereUpdatedAt($value)
  * @method static \Illuminate\Database\Eloquent\Builder<static>|AsistenciaSesion withTrashed()
  * @method static \Illuminate\Database\Eloquent\Builder<static>|AsistenciaSesion withoutTrashed()
+ * @property int $configuracion_id
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|AsistenciaSesion whereConfiguracionId($value)
  * @mixin \Eloquent
  */
 class AsistenciaSesion extends Model
@@ -41,12 +45,12 @@ class AsistenciaSesion extends Model
     protected $table = 'asistencia_sesiones';
 
 
-    protected $fillable =
-        [
-    'fecha',
-    'estado',
-    'espacio_id'
-];
+    protected $fillable = [
+        'fecha',
+        'estado',
+        'espacio_id',
+        'configuracion_id'
+    ];
 
 
     /**
@@ -54,8 +58,7 @@ class AsistenciaSesion extends Model
      *
      * @var array
      */
-    protected $casts =
-        [
+    protected $casts = [
         'id' => 'integer',
         'fecha' => 'date',
         'estado' => 'string',
@@ -66,18 +69,16 @@ class AsistenciaSesion extends Model
     ];
 
 
-
     /**
      * Validation rules
      *
      * @var array
      */
-    public static $rules =
-    [
-    'fecha' => 'required|date',
-    'estado' => 'required|string',
-    'espacio_id' => 'required|integer',
-];
+    public static $rules = [
+        'fecha' => 'required|date',
+        'estado' => 'required|string',
+        'espacio_id' => 'required|integer',
+    ];
 
 
     /**
@@ -85,19 +86,21 @@ class AsistenciaSesion extends Model
      *
      * @var array
      */
-    public static $messages =[
+    public static $messages = [
 
     ];
 
+    const EN_CURSO = 'En curso';
+    const FINALIZADA = 'Finalizada';
 
     /**
      * Accessor for relationships
      *
      * @var array
      */
-    public function trabajoEspacio()
+    public function espacio(): BelongsTo
     {
-    return $this->belongsTo(TrabajoEspacio::class,'espacio_id','id');
+        return $this->belongsTo(TrabajoEspacio::class, 'espacio_id', 'id');
     }
 
 }

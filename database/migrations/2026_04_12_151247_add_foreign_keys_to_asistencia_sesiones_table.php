@@ -13,6 +13,8 @@ return new class extends Migration
     {
         Schema::table('asistencia_sesiones', function (Blueprint $table) {
             $table->foreign(['espacio_id'], 'fk_asistencia_sesiones_trabajo_espacios1')->references(['id'])->on('trabajo_espacios')->onUpdate('no action')->onDelete('no action');
+            $table->foreign(['configuracion_id'], 'fk_asistencia_sesiones_configuraciones1')->references(['id'])->on('asistencia_configuraciones')->onUpdate('no action')->onDelete('no action');
+
         });
     }
 
@@ -23,6 +25,7 @@ return new class extends Migration
     {
         Schema::table('asistencia_sesiones', function (Blueprint $table) {
             $table->dropForeign('fk_asistencia_sesiones_trabajo_espacios1');
+            $table->dropForeign('fk_asistencia_sesiones_configuraciones1');
         });
     }
 };

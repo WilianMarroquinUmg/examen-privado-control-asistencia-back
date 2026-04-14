@@ -10,7 +10,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
 /**
- *
+ * 
  *
  * @property int $id
  * @property string $nombre
@@ -32,6 +32,10 @@ use Illuminate\Database\Eloquent\SoftDeletes;
  * @method static \Illuminate\Database\Eloquent\Builder<static>|Curso whereUpdatedAt($value)
  * @method static \Illuminate\Database\Eloquent\Builder<static>|Curso withTrashed()
  * @method static \Illuminate\Database\Eloquent\Builder<static>|Curso withoutTrashed()
+ * @property-read \Illuminate\Database\Eloquent\Collection<int, \App\Models\Pensum\Ciclo> $ciclos
+ * @property-read int|null $ciclos_count
+ * @method static Builder<static>|Curso asociadosACicloYFacultad($facultadYCiclo)
+ * @method static Builder<static>|Curso sinAsociarACicloYFacultad($facultadYCiclo)
  * @mixin \Eloquent
  */
 class Curso extends Model

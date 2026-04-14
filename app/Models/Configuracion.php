@@ -11,6 +11,8 @@ use Spatie\MediaLibrary\HasMedia;
 use Spatie\MediaLibrary\InteractsWithMedia;
 
 /**
+ * 
+ *
  * @property int $id
  * @property string $key
  * @property string $value
@@ -31,6 +33,8 @@ use Spatie\MediaLibrary\InteractsWithMedia;
  * @method static \Illuminate\Database\Eloquent\Builder<static>|Configuracion whereValue($value)
  * @method static \Illuminate\Database\Eloquent\Builder<static>|Configuracion withTrashed()
  * @method static \Illuminate\Database\Eloquent\Builder<static>|Configuracion withoutTrashed()
+ * @property-read \Spatie\MediaLibrary\MediaCollections\Models\Collections\MediaCollection<int, \Spatie\MediaLibrary\MediaCollections\Models\Media> $media
+ * @property-read int|null $media_count
  * @mixin \Eloquent
  */
 class Configuracion extends Model implements HasMedia

@@ -3,12 +3,13 @@
 namespace App\Models;
 
 
+use App\Models\EspacioTrabajo\TrabajoEspacio;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 
 /**
- * 
+ *
  *
  * @property int $id
  * @property int $requiere_ubicacion
@@ -50,16 +51,13 @@ class AsistenciaConfiguracion extends Model
     protected $table = 'asistencia_configuraciones';
 
 
-    protected $fillable =
-        [
-    'requiere_ubicacion',
-    'requiere_prueba_vida',
-    'requiere_codigo_otp',
-    'cantidad_tomas_requeridas',
-    'minutos_tolerancia',
-    'catedratico_id',
-    'espacio_id'
-];
+    protected $fillable = [
+            'requiere_ubicacion',
+            'requiere_prueba_vida',
+            'requiere_codigo_otp',
+            'cantidad_tomas_requeridas',
+            'minutos_tolerancia',
+        ];
 
 
     /**
@@ -67,21 +65,19 @@ class AsistenciaConfiguracion extends Model
      *
      * @var array
      */
-    protected $casts =
-        [
-        'id' => 'integer',
-        'requiere_ubicacion' => 'integer',
-        'requiere_prueba_vida' => 'integer',
-        'requiere_codigo_otp' => 'integer',
-        'cantidad_tomas_requeridas' => 'string',
-        'minutos_tolerancia' => 'integer',
-        'catedratico_id' => 'integer',
-        'espacio_id' => 'integer',
-        'created_at' => 'timestamp',
-        'updated_at' => 'timestamp',
-        'deleted_at' => 'timestamp',
-    ];
-
+    protected $casts = [
+            'id' => 'integer',
+            'requiere_ubicacion' => 'integer',
+            'requiere_prueba_vida' => 'integer',
+            'requiere_codigo_otp' => 'integer',
+            'cantidad_tomas_requeridas' => 'string',
+            'minutos_tolerancia' => 'integer',
+            'catedratico_id' => 'integer',
+            'espacio_id' => 'integer',
+            'created_at' => 'timestamp',
+            'updated_at' => 'timestamp',
+            'deleted_at' => 'timestamp',
+        ];
 
 
     /**
@@ -89,16 +85,15 @@ class AsistenciaConfiguracion extends Model
      *
      * @var array
      */
-    public static $rules =
-    [
-    'requiere_ubicacion' => 'required|integer',
-    'requiere_prueba_vida' => 'required|integer',
-    'requiere_codigo_otp' => 'required|integer',
-    'cantidad_tomas_requeridas' => 'required|string|max:45',
-    'minutos_tolerancia' => 'required|integer',
-    'catedratico_id' => 'required|integer',
-    'espacio_id' => 'required|integer',
-];
+    public static $rules = [
+            'requiere_ubicacion' => 'required|integer',
+            'requiere_prueba_vida' => 'required|integer',
+            'requiere_codigo_otp' => 'required|integer',
+            'cantidad_tomas_requeridas' => 'required|string|max:45',
+            'minutos_tolerancia' => 'required|integer',
+            'catedratico_id' => 'required|integer',
+            'espacio_id' => 'required|integer',
+        ];
 
 
     /**
@@ -106,7 +101,7 @@ class AsistenciaConfiguracion extends Model
      *
      * @var array
      */
-    public static $messages =[
+    public static $messages = [
 
     ];
 
@@ -116,14 +111,14 @@ class AsistenciaConfiguracion extends Model
      *
      * @var array
      */
-    public function trabajoEspacio()
+    public function espacio()
     {
-    return $this->belongsTo(TrabajoEspacio::class,'espacio_id','id');
+        return $this->belongsTo(TrabajoEspacio::class, 'espacio_id', 'id');
     }
 
     public function user()
     {
-    return $this->belongsTo(User::class,'catedratico_id','id');
+        return $this->belongsTo(User::class, 'catedratico_id', 'id');
     }
 
 }

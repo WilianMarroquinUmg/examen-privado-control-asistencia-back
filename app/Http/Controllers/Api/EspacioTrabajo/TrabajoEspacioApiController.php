@@ -147,7 +147,6 @@ class TrabajoEspacioApiController extends AppbaseController implements HasMiddle
             'ciclo',
             'curso',
             'sesiones',
-            'configuration',
         ]);
         return $this->sendResponse($trabajo_espacio->toArray(), 'TrabajoEspacio recuperado con éxito.');
     }

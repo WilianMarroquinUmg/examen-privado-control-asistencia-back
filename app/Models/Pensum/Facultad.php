@@ -9,7 +9,7 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 
 /**
- *
+ * 
  *
  * @property int $id
  * @property string $nombre
@@ -29,6 +29,8 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
  * @method static \Illuminate\Database\Eloquent\Builder<static>|Facultad whereUpdatedAt($value)
  * @method static \Illuminate\Database\Eloquent\Builder<static>|Facultad withTrashed()
  * @method static \Illuminate\Database\Eloquent\Builder<static>|Facultad withoutTrashed()
+ * @property-read \Illuminate\Database\Eloquent\Collection<int, \App\Models\Pensum\Ciclo> $ciclos
+ * @property-read int|null $ciclos_count
  * @mixin \Eloquent
  */
 class Facultad extends Model

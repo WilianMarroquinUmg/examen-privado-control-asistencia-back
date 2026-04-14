@@ -8,7 +8,7 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 
 /**
- *
+ * 
  *
  * @property int $id
  * @property string $name
@@ -23,6 +23,12 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
  * @method static \Illuminate\Database\Eloquent\Builder<static>|Rol whereId($value)
  * @method static \Illuminate\Database\Eloquent\Builder<static>|Rol whereName($value)
  * @method static \Illuminate\Database\Eloquent\Builder<static>|Rol whereUpdatedAt($value)
+ * @property-read \Illuminate\Database\Eloquent\Collection<int, \Spatie\Permission\Models\Permission> $permissions
+ * @property-read int|null $permissions_count
+ * @property-read \Illuminate\Database\Eloquent\Collection<int, \App\Models\User> $users
+ * @property-read int|null $users_count
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|Rol permission($permissions, $without = false)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|Rol withoutPermission($permissions)
  * @mixin \Eloquent
  */
 

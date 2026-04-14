@@ -8,7 +8,7 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 
 /**
- *
+ * 
  *
  * @property int $id
  * @property string $titulo
@@ -35,6 +35,11 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
  * @method static \Illuminate\Database\Eloquent\Builder<static>|MenuOpcion whereTitulo($value)
  * @method static \Illuminate\Database\Eloquent\Builder<static>|MenuOpcion whereTituloSeccion($value)
  * @method static \Illuminate\Database\Eloquent\Builder<static>|MenuOpcion whereUpdatedAt($value)
+ * @property int|null $parent_id opcion padre
+ * @property-read \Illuminate\Database\Eloquent\Collection<int, MenuOpcion> $children
+ * @property-read int|null $children_count
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|MenuOpcion padres()
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|MenuOpcion whereParentId($value)
  * @mixin \Eloquent
  */
 class MenuOpcion extends Model

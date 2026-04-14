@@ -3,6 +3,8 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\AppBaseController;
+use App\Models\AsistenciaConfiguracion;
+use App\Models\EspacioTrabajo\TrabajoEspacio;
 use Illuminate\Routing\Controllers\HasMiddleware;
 use Illuminate\Routing\Controllers\Middleware;
 use App\Http\Requests\Api\CreateAsistenciaSesionApiRequest;
@@ -40,15 +42,15 @@ class AsistenciaSesionApiController extends AppbaseController implements HasMidd
     {
         $asistencia_sesiones = QueryBuilder::for(AsistenciaSesion::class)
             ->allowedFilters([
-    'fecha',
-    'estado',
-    'espacio_id'
-])
+                'fecha',
+                'estado',
+                'espacio_id'
+            ])
             ->allowedSorts([
-    'fecha',
-    'estado',
-    'espacio_id'
-])
+                'fecha',
+                'estado',
+                'espacio_id'
+            ])
             ->defaultSort('-id') // Ordenar por defecto por fecha descendente
             ->Paginate(request('page.size') ?? 10);
 
@@ -60,13 +62,45 @@ class AsistenciaSesionApiController extends AppbaseController implements HasMidd
      * Store a newly created AsistenciaSesion in storage.
      * POST /asistencia_sesiones
      */
-    public function store(CreateAsistenciaSesionApiRequest $request): JsonResponse
+    public function store(Request $request): JsonResponse
     {
-        $input = $request->all();
 
-        $asistencia_sesiones = AsistenciaSesion::create($input);
+        $request->validate([
+            'espacio_id' => 'required',
+            'requiere_ubicacion' => 'required',
+            'requiere_prueba_vida' => 'required',
+            'cantidad_tomas' => 'required',
+            'requiere_codigo_otp' => 'required',
+            'minutos_tolerancia' => 'required',
+        ]);
 
-        return $this->sendResponse($asistencia_sesiones->toArray(), 'AsistenciaSesion creado con éxito.');
+        try {
+            $configuration = AsistenciaConfiguracion::create([
+                'requiere_ubicacion' => $request->input('requiere_ubicacion'),
+                'requiere_prueba_vida' => $request->input('requiere_prueba_vida'),
+                'requiere_codigo_otp' => $request->input('requiere_codigo_otp'),
+                'cantidad_tomas_requeridas' => $request->input('cantidad_tomas'),
+                'minutos_tolerancia' => $request->input('minutos_tolerancia'),
+                'espacio_id' => $request->input('espacio_id'),
+            ]);
+
+            AsistenciaSesion::create([
+                'fecha' => now(),
+                'estado' => AsistenciaSesion::EN_CURSO,
+                'espacio_id' => $request->input('espacio_id'),
+                'configuracion_id' => $configuration->id
+            ]);
+
+            $espacio = TrabajoEspacio::findOrFail($request->input('espacio_id'));
+
+            $espacio->update([
+                'estado' => TrabajoEspacio::ACTIVO
+            ]);
+        } catch (\Exception $e) {
+            return $this->sendError('Error al crear Sesión: ' . $e->getMessage(), 500);
+        }
+
+        return $this->sendSuccess('Sesión creada con éxito.');
     }
 
     /**
@@ -79,9 +113,9 @@ class AsistenciaSesionApiController extends AppbaseController implements HasMidd
     }
 
     /**
-    * Update the specified AsistenciaSesion in storage.
-    * PUT/PATCH /asistencia_sesiones/{id}
-    */
+     * Update the specified AsistenciaSesion in storage.
+     * PUT/PATCH /asistencia_sesiones/{id}
+     */
     public function update(UpdateAsistenciaSesionApiRequest $request, $id): JsonResponse
     {
         $asistenciasesion = AsistenciaSesion::findOrFail($id);
@@ -90,9 +124,9 @@ class AsistenciaSesionApiController extends AppbaseController implements HasMidd
     }
 
     /**
-    * Remove the specified AsistenciaSesion from storage.
-    * DELETE /asistencia_sesiones/{id}
-    */
+     * Remove the specified AsistenciaSesion from storage.
+     * DELETE /asistencia_sesiones/{id}
+     */
     public function destroy(AsistenciaSesion $asistenciasesion): JsonResponse
     {
         $asistenciasesion->delete();

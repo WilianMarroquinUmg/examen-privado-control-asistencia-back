@@ -18,8 +18,6 @@ return new class extends Migration
             $table->tinyInteger('requiere_codigo_otp');
             $table->string('cantidad_tomas_requeridas', 45);
             $table->integer('minutos_tolerancia');
-            $table->unsignedBigInteger('catedratico_id')->index('fk_asistencia_configuraciones_users1_idx');
-            $table->unsignedBigInteger('espacio_id')->index('fk_asistencia_configuraciones_trabajo_espacios1_idx');
             $table->timestamps();
             $table->softDeletes();
 
