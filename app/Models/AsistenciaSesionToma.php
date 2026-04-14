@@ -4,11 +4,12 @@ namespace App\Models;
 
 
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 
 /**
- * 
+ *
  *
  * @property int $id
  * @property \Illuminate\Support\Carbon $hora_apertura
@@ -49,16 +50,16 @@ class AsistenciaSesionToma extends Model
     protected $table = 'asistencia_sesion_tomas';
 
 
-    protected $fillable =
-        [
-    'hora_apertura',
-    'hora_cierre',
-    'codito_otp',
-    'numero_toma',
-    'sesion_id',
-    'longitud_origen',
-    'latitud_origen'
-];
+    protected $fillable = [
+        'hora_apertura',
+        'hora_cierre',
+        'codito_otp',
+        'numero_toma',
+        'sesion_id',
+        'longitud_origen',
+        'latitud_origen',
+        'radio_metros',
+    ];
 
 
     /**
@@ -66,8 +67,8 @@ class AsistenciaSesionToma extends Model
      *
      * @var array
      */
-    protected $casts =
-        [
+
+    protected $casts = [
         'id' => 'integer',
         'hora_apertura' => 'datetime',
         'hora_cierre' => 'datetime',
@@ -82,22 +83,20 @@ class AsistenciaSesionToma extends Model
     ];
 
 
-
     /**
      * Validation rules
      *
      * @var array
      */
-    public static $rules =
-    [
-    'hora_apertura' => 'required|date',
-    'hora_cierre' => 'required|date',
-    'codito_otp' => 'nullable|string|max:10',
-    'numero_toma' => 'required|integer',
-    'sesion_id' => 'required|integer',
-    'longitud_origen' => 'nullable|numeric',
-    'latitud_origen' => 'nullable|numeric',
-];
+    public static $rules = [
+        'hora_apertura' => 'required|date',
+        'hora_cierre' => 'required|date',
+        'codito_otp' => 'nullable|string|max:10',
+        'numero_toma' => 'required|integer',
+        'sesion_id' => 'required|integer',
+        'longitud_origen' => 'nullable|numeric',
+        'latitud_origen' => 'nullable|numeric',
+    ];
 
 
     /**
@@ -105,7 +104,7 @@ class AsistenciaSesionToma extends Model
      *
      * @var array
      */
-    public static $messages =[
+    public static $messages = [
 
     ];
 
@@ -115,9 +114,9 @@ class AsistenciaSesionToma extends Model
      *
      * @var array
      */
-    public function asistenciaSesione()
+    public function sesion(): BelongsTo
     {
-    return $this->belongsTo(AsistenciaSesione::class,'sesion_id','id');
+        return $this->belongsTo(AsistenciaSesion::class, 'sesion_id', 'id');
     }
 
 }

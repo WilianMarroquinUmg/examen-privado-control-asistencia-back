@@ -67,10 +67,10 @@ class AsistenciaConfiguracion extends Model
      */
     protected $casts = [
             'id' => 'integer',
-            'requiere_ubicacion' => 'integer',
-            'requiere_prueba_vida' => 'integer',
-            'requiere_codigo_otp' => 'integer',
-            'cantidad_tomas_requeridas' => 'string',
+            'requiere_ubicacion' => 'boolean',
+            'requiere_prueba_vida' => 'boolean',
+            'requiere_codigo_otp' => 'boolean',
+            'cantidad_tomas_requeridas' => 'integer',
             'minutos_tolerancia' => 'integer',
             'catedratico_id' => 'integer',
             'espacio_id' => 'integer',

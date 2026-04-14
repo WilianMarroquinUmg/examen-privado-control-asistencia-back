@@ -20,6 +20,7 @@ return new class extends Migration
             $table->unsignedBigInteger('sesion_id')->index('fk_asistencia_sesion_tomas_asistencia_sessiones1_idx');
             $table->string('longitud_origen', 50)->nullable();
             $table->string('latitud_origen', 50)->nullable();
+            $table->integer('radio_metros')->nullable();
             $table->timestamps();
             $table->softDeletes();
         });

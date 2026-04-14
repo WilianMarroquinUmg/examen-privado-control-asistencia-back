@@ -39,7 +39,7 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::apiResource('asistencia-configuraciones', App\Http\Controllers\Api\AsistenciaConfiguracionApiController::class)
         ->parameters(['asistencia_configuraciones' => 'asistenciaconfiguracion']);
 
-    Route::apiResource('asistencia_sesion_tomas', App\Http\Controllers\Api\AsistenciaSesionTomaApiController::class)
+    Route::apiResource('asistencia-sesion-tomas', App\Http\Controllers\Api\AsistenciaSesionTomaApiController::class)
         ->parameters(['asistencia_sesion_tomas' => 'asistenciasesiontoma']);
 
 

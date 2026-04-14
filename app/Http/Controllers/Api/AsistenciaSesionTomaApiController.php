@@ -5,12 +5,13 @@ namespace App\Http\Controllers\Api;
 use App\Http\Controllers\AppBaseController;
 use Illuminate\Routing\Controllers\HasMiddleware;
 use Illuminate\Routing\Controllers\Middleware;
-use App\Http\Requests\Api\CreateAsistenciaSesionTomaApiRequest;
 use App\Http\Requests\Api\UpdateAsistenciaSesionTomaApiRequest;
 use App\Models\AsistenciaSesionToma;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Spatie\QueryBuilder\QueryBuilder;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 
 /**
  * Class AsistenciaSesionTomaApiController
@@ -65,16 +66,44 @@ class AsistenciaSesionTomaApiController extends AppbaseController implements Has
 
 
     /**
+
      * Store a newly created AsistenciaSesionToma in storage.
      * POST /asistencia_sesion_tomas
      */
-    public function store(CreateAsistenciaSesionTomaApiRequest $request): JsonResponse
+
+
+// ...
+
+    public function store(Request $request): JsonResponse
     {
-        $input = $request->all();
+        DB::beginTransaction();
 
-        $asistencia_sesion_tomas = AsistenciaSesionToma::create($input);
+        try {
+            $input = $request->all();
 
-        return $this->sendResponse($asistencia_sesion_tomas->toArray(), 'AsistenciaSesionToma creado con éxito.');
+            $input['hora_apertura'] = now();
+            $input['hora_cierre'] = now()->addMinutes($request->input('minutos_tolerancia', 30)); // Agrega minutos de tolerancia a la hora de cierre
+
+
+
+            $asistencia_sesion_tomas = AsistenciaSesionToma::create($input);
+
+            DB::commit();
+
+            return $this->sendResponse(
+                $asistencia_sesion_tomas->toArray(),
+                'Toma de asistencia aperturada con éxito.'
+            );
+
+        } catch (\Exception $e) {
+            DB::rollBack();
+
+            Log::error('Error al crear Toma de Asistencia: ' . $e->getMessage(), [
+                'request' => $request->all()
+            ]);
+
+            return $this->sendError($e->getMessage(), 500);
+        }
     }
 
     /**
