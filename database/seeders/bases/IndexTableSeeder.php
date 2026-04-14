@@ -2,6 +2,7 @@
 
 namespace Database\Seeders\bases;
 
+use Database\Seeders\RolesTableSeeder;
 use Illuminate\Database\Seeder;
 
 class IndexTableSeeder extends Seeder
@@ -16,7 +17,7 @@ class IndexTableSeeder extends Seeder
         $this->call([
             UsersEstadosTableSeeder::class,
             UserSeeder::class,
-            RolesPermisosBaseTableSeeder::class,
+            RolesTableSeeder::class,
             MenuOpcionesTableSeeder::class,
             ConfiguracionesTableSeeder::class,
         ]);

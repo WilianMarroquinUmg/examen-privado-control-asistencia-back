@@ -1,14 +1,13 @@
 <?php
 
-namespace Database\Seeders\bases;
+namespace Database\Seeders\permisos;
 
+use App\Models\Rol;
 use App\Models\Permission;
-use App\Models\User;
 use Illuminate\Database\Seeder;
-use Illuminate\Support\Facades\DB;
-use Spatie\Permission\Models\Role;
 
-class RolesPermisosBaseTableSeeder extends Seeder
+
+class PermisosBasicosTableSeeder extends Seeder
 {
     /**
      * Run the database seeds.
@@ -17,17 +16,6 @@ class RolesPermisosBaseTableSeeder extends Seeder
      */
     public function run()
     {
-        DB::statement('SET FOREIGN_KEY_CHECKS=0;');
-
-        Role::truncate();
-        Permission::truncate();
-
-        //Crea los roles por defecto del sistema.
-        $rolAdministrador = Role::create(['name' => 'Administrador', 'guard_name' => 'web']);
-        $rolEmpleado = Role::create(['name' => 'Empleado', 'guard_name' => 'web']);
-        $rolProgramador = Role::create(['name' => 'Programador', 'guard_name' => 'web']);
-        $rolEstudiante = Role::create(['name' => 'Estudiante', 'guard_name' => 'web']);
-        $catedratico = Role::create(['name' => 'Catedrático', 'guard_name' => 'web']);
 
         // Permisos para administrar las Opciones Del Menu.
         Permission::create(['name' => 'Ver Menu Opciones', 'subject' => 'Menu Opcion', 'guard_name' => 'web']);
@@ -89,74 +77,6 @@ class RolesPermisosBaseTableSeeder extends Seeder
         Permission::create(['name' => 'Listar Configuraciones', 'subject' => 'Configuracion', 'guard_name' => 'web']);
         Permission::create(['name' => 'Listar Componentes', 'subject' => 'Desarrollo', 'guard_name' => 'web']);
 
-        // Asignar todos los permisos al rol Administrador.
-        $rolAdministrador->syncPermissions([
-            'Ver Menu Opciones',      // Permite ver el menú de opciones
-            'Crear Menu Opciones',    // Permite crear opciones en el menú
-            'Editar Menu Opciones',   // Permite editar las opciones del menú
-            'Eliminar Menu Opciones', // Permite eliminar opciones del menú
-            'Ver Usuarios',           // Permite ver Usuarios
-            'Crear Usuarios',         // Permite crear Usuarios
-            'Editar Usuarios',        // Permite editar Usuarios
-            'Eliminar Usuarios',      // Permite eliminar usuarios
-            'Ver Permisos',           // Permite ver Permisos
-            'Crear Permisos',         // Permite crear Permisos
-            'Editar Permisos',        // Permite editar Permisos
-            'Eliminar Permisos',      // Permite eliminar permisos
-            'Ver Roles',              // Permite ver Roles
-            'Crear Roles',            // Permite crear Roles
-            'Editar Roles',           // Permite editar Roles
-            'Eliminar Roles',         // Permite eliminar roles
-            'Listar Inicio',          // Solo permisos básicos para la página de inicio
-            'Ver Menu Preferencias',  // Solo permisos básicos para el menú de preferencias
-            'Ver Modulo Usuarios',    // Permite ver el módulo de usuarios
-            'Listar Usuarios',        // Permite listar usuarios
-            'Listar Roles',           // Permite listar roles
-            'Listar Permisos',        // Permite listar permisos
-            'Ver Modulo Configuracion',// Permite ver el módulo de configuración
-            'Listar Menu Opciones',   // Permite listar el menú de opciones
-            'Listar Configuraciones Generales', // Permite listar configuraciones
-            'Actualizar Configuraciones Generales', // Permite listar configuraciones
-            'Actualizar Perfil Usuario' , // Permite actualizar el perfil del usuario
-            'Ver Perfil Usuario' , // Permite ver el perfil del usuario
-            'Listar Usuario Estados' , // Permite ver el modulo de estados de usuario
-            'Ver Usuario Estados' , // Permite ver un usuario especifico
-            'Crear Usuario Estados' , // Permite crear un nuevo usuario
-            'Editar Usuario Estados' , // Permite editar un usuario
-            'Eliminar Usuario Estados' , // Permite eliminar un usuario
-        ]);
-
-        // Asignación de permisos al rol Empleado.
-        $rolEmpleado->syncPermissions([
-            'Ver Menu Preferencias', // Solo permisos básicos para el menú de preferencias
-            'Listar Inicio',          // Solo permisos básicos para la página de inicio
-            'Ver Menu Opciones',      // Permite ver el menú de opciones
-            'Actualizar Perfil Usuario' , // Permite actualizar el perfil del usuario
-            'Ver Perfil Usuario' , // Permite ver el perfil del usuario
-        ]);
-
-        // Asignación de permisos al rol Programador.
-        $rolProgramador->syncPermissions([
-            'Listar Inicio', // Solo permisos básicos para la página de inicio
-            'Ver Menu Preferencias', // Solo permisos básicos para el menú de preferencias
-            'Ver Menu Opciones',      // Permite ver el menú de opciones
-            'Ver Modulo Desarrollo', // Permite ver el módulo de desarrollo
-            'Listar Configuraciones' ,        // Permite ver ejemplos
-            'Listar Componentes' ,        // Permite ver ejemplos
-            'Ver Configuraciones' ,        // Permite ver ejemplos
-            'Crear Configuraciones' ,        // Permite ver ejemplos
-            'Editar Configuraciones' ,        // Permite ver ejemplos
-            'Eliminar Configuraciones' ,        // Permite ver ejemplos
-            'Actualizar Perfil Usuario' , // Permite actualizar el perfil del usuario
-            'Ver Perfil Usuario' , // Permite ver el perfil del usuario
-        ]);
-
-        // El super admin obtiene todos los permisos por defecto.
-        Role::create(['name' => 'Super Admin', 'guard_name' => 'web']);
-
-        User::find(1)->assignRole('Super Admin');
-
-        DB::statement('SET FOREIGN_KEY_CHECKS=1;');
     }
-}
 
+}
