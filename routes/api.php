@@ -24,16 +24,20 @@ Route::middleware('auth:sanctum')->group(function () {
 
     Route::post('ciclos-des-asociar-cursos', [CicloApiController::class, 'desAsociarCurso']);
 
-
     Route::apiResource('ciclos', CicloApiController::class)
         ->parameters(['ciclos' => 'ciclo']);
 
     Route::apiResource('cursos', App\Http\Controllers\Api\Pensum\CursoApiController::class)
         ->parameters(['cursos' => 'curso']);
 
-
     Route::apiResource('trabajo-espacios', App\Http\Controllers\Api\EspacioTrabajo\TrabajoEspacioApiController::class)
         ->parameters(['trabajo_espacios' => 'trabajoespacio']);
+
+    Route::apiResource('asistencia-sesiones', App\Http\Controllers\Api\AsistenciaSesionApiController::class)
+        ->parameters(['asistencia_sesiones' => 'asistenciasesion']);
+
+    Route::apiResource('asistencia-configuraciones', App\Http\Controllers\Api\AsistenciaConfiguracionApiController::class)
+        ->parameters(['asistencia_configuraciones' => 'asistenciaconfiguracion']);
 
 });
 
@@ -44,7 +48,6 @@ Route::prefix('libres')->group(function () {
     require __DIR__.'/admin/Configuraciones/api_libres.php';
 
 });
-
 
 
 

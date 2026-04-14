@@ -3,6 +3,8 @@
 namespace App\Models\EspacioTrabajo;
 
 
+use App\Models\AsistenciaConfiguracion;
+use App\Models\AsistenciaSesion;
 use App\Models\Pensum\Ciclo;
 use App\Models\Pensum\Curso;
 use App\Models\Pensum\Facultad;
@@ -11,6 +13,8 @@ use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
+use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Spatie\MediaLibrary\HasMedia;
@@ -137,6 +141,17 @@ class TrabajoEspacio extends Model implements HasMedia
             'trabajo_espacios_id',
             'users_id'
         );
+    }
+
+    public function configuration(): HasOne
+    {
+        return $this->hasOne(AsistenciaConfiguracion::class, 'espacio_id', 'id');
+
+    }
+
+    public function sesiones(): HasMany
+    {
+        return $this->hasMany(AsistenciaSesion::class, 'espacio_id', 'id');
     }
 
     public function scopeBuscar(Builder $query, $busqueda)

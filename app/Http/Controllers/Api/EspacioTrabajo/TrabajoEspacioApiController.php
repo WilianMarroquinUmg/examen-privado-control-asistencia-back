@@ -140,9 +140,16 @@ class TrabajoEspacioApiController extends AppbaseController implements HasMiddle
      * Display the specified TrabajoEspacio.
      * GET|HEAD /trabajo_espacios/{id}
      */
-    public function show(TrabajoEspacio $trabajoespacio)
+    public function show(TrabajoEspacio $trabajo_espacio)
     {
-        return $this->sendResponse($trabajoespacio->toArray(), 'TrabajoEspacio recuperado con éxito.');
+        $trabajo_espacio->load([
+            'facultad',
+            'ciclo',
+            'curso',
+            'sesiones',
+            'configuration',
+        ]);
+        return $this->sendResponse($trabajo_espacio->toArray(), 'TrabajoEspacio recuperado con éxito.');
     }
 
     /**
@@ -160,9 +167,9 @@ class TrabajoEspacioApiController extends AppbaseController implements HasMiddle
      * Remove the specified TrabajoEspacio from storage.
      * DELETE /trabajo_espacios/{id}
      */
-    public function destroy(TrabajoEspacio $trabajoespacio): JsonResponse
+    public function destroy(TrabajoEspacio $trabajo_espacio): JsonResponse
     {
-        $trabajoespacio->delete();
+        $trabajo_espacio->delete();
         return $this->sendResponse(null, 'TrabajoEspacio eliminado con éxito.');
     }
 }

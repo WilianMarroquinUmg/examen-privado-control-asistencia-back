@@ -19,7 +19,9 @@ class IndexPermisosTableSeeder extends Seeder
             CicloPermisosTableSeeder::class,
             CursoPermisosTableSeeder::class,
             MenuPermisosTableSeeder::class,
-            TrabajoEspacioPermisosTableSeeder::class
+            TrabajoEspacioPermisosTableSeeder::class,
+            AsistenciaConfiguracionPermisosTableSeeder::class,
+            AsistenciaSesionPermisosTableSeeder::class,
         ]);
 
     }

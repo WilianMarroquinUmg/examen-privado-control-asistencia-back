@@ -17,7 +17,7 @@ return new class extends Migration
             $table->dateTime('hora_cierre');
             $table->string('codito_otp', 10)->nullable();
             $table->integer('numero_toma');
-            $table->bigInteger('sesion_id')->index('fk_asistencia_sesion_tomas_asistencia_sessiones1_idx');
+            $table->unsignedBigInteger('sesion_id')->index('fk_asistencia_sesion_tomas_asistencia_sessiones1_idx');
             $table->decimal('longitud_origen', 10, 8)->nullable();
             $table->decimal('latitud_origen', 10, 8)->nullable();
             $table->timestamps();

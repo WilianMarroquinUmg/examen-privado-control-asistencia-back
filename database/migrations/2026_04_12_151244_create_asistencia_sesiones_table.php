@@ -12,7 +12,7 @@ return new class extends Migration
     public function up(): void
     {
         Schema::create('asistencia_sesiones', function (Blueprint $table) {
-            $table->bigInteger('id')->primary();
+            $table->bigIncrements('id');
             $table->date('fecha');
             $table->enum('estado', ['En curso', 'Finalizada']);
             $table->unsignedBigInteger('espacio_id')->index('fk_asistencia_sesiones_trabajo_espacios1_idx');
