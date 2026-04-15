@@ -93,8 +93,8 @@ class AsistenciaRegistroApiController extends AppbaseController implements HasMi
             }
 
             // 2. Validación de PIN (OTP)
-            if ($config->requiere_codigo_otp && ($request->codigo_otp !== $toma->codito_otp)) {
-                return $this->sendError('El código PIN es incorrecto.', [], 400);
+            if ($config->requiere_codigo_otp && ($request->codigo_otp !== $toma->codigo_otp)) {
+                return $this->sendError('El código OTP es incorrecto.', 400);
             }
 
             // 3. Validación de Coordenadas (Haversine)

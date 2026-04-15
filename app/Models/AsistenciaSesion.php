@@ -137,7 +137,7 @@ class AsistenciaSesion extends Model
 
     public function tomas(): HasMany
     {
-        return $this->hasMany(AsistenciaSesionToma::class, 'sesion_id', 'id');
+        return $this->hasMany(AsistenciaSesionToma::class, 'sesion_id', 'id')->orderBy('id', 'desc');
 
     }
 

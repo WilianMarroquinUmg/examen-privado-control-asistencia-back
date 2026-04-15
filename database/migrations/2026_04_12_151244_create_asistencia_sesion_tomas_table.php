@@ -15,7 +15,7 @@ return new class extends Migration
             $table->bigIncrements('id');
             $table->dateTime('hora_apertura');
             $table->dateTime('hora_cierre');
-            $table->string('codito_otp', 10)->nullable();
+            $table->string('codigo_otp', 10)->nullable();
             $table->integer('numero_toma');
             $table->unsignedBigInteger('sesion_id')->index('fk_asistencia_sesion_tomas_asistencia_sessiones1_idx');
             $table->string('longitud_origen', 50)->nullable();

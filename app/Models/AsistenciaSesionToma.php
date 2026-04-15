@@ -96,7 +96,7 @@ class AsistenciaSesionToma extends Model
     public static $rules = [
         'hora_apertura' => 'required|date',
         'hora_cierre' => 'required|date',
-        'codito_otp' => 'nullable|string|max:10',
+        'codigo_otp' => 'nullable|string|max:10',
         'numero_toma' => 'required|integer',
         'sesion_id' => 'required|integer',
         'longitud_origen' => 'nullable|numeric',
