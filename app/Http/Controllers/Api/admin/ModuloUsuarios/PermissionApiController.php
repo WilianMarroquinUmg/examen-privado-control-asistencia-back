@@ -24,7 +24,7 @@ class PermissionApiController extends AppbaseController implements HasMiddleware
     public static function middleware(): array
     {
         return [
-            new Middleware('permission:Listar Permisos', only: ['index']),
+            new Middleware('permission:Ver Permisos', only: ['index']),
             new Middleware('permission:Ver permisos', only: ['show', 'obtenerTodos']),
             new Middleware('permission:Crear permisos', only: ['store']),
             new Middleware('permission:Editar permisos', only: ['update']),

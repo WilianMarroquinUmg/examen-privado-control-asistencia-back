@@ -25,7 +25,7 @@ class CicloApiController extends AppbaseController implements HasMiddleware
     public static function middleware(): array
     {
         return [
-            new Middleware('permission:Listar Ciclos', only: ['index']),
+            new Middleware('permission:Ver Ciclos', only: ['index']),
             new Middleware('permission:Ver Ciclos', only: ['show']),
             new Middleware('permission:Crear Ciclos', only: ['store']),
             new Middleware('permission:Editar Ciclos', only: ['update']),

@@ -31,9 +31,7 @@ class AsistenciaRegistroPermisosTableSeeder extends Seeder
             ]);
         }
 
-        $admin = Rol::find(Rol::ADMIN);
 
-        $admin->givePermissionTo($permisos);
 
     }
 

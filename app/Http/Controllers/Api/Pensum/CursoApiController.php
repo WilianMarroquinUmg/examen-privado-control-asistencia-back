@@ -25,7 +25,7 @@ class CursoApiController extends AppbaseController implements HasMiddleware
     public static function middleware(): array
     {
         return [
-            new Middleware('permission:Listar Cursos', only: ['index']),
+            new Middleware('permission:Ver Cursos', only: ['index']),
             new Middleware('permission:Ver Cursos', only: ['show']),
             new Middleware('permission:Crear Cursos', only: ['store']),
             new Middleware('permission:Editar Cursos', only: ['update']),

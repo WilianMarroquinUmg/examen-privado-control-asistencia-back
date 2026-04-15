@@ -26,7 +26,7 @@ class AsistenciaSesionApiController extends AppbaseController implements HasMidd
     public static function middleware(): array
     {
         return [
-            new Middleware('permission:Listar Asistencia Sesiones', only: ['index']),
+            new Middleware('permission:Ver Asistencia Sesiones', only: ['index']),
             new Middleware('permission:Ver Asistencia Sesiones', only: ['show']),
             new Middleware('permission:Crear Asistencia Sesiones', only: ['store']),
             new Middleware('permission:Editar Asistencia Sesiones', only: ['update']),

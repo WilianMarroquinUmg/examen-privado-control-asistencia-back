@@ -15,10 +15,10 @@ class DatabaseSeeder extends Seeder
      */
     public function run(): void
     {
-
-        $this->call(IndexTableSeeder::class);
         $this->call(IndexPermisosTableSeeder::class);
+        $this->call(IndexTableSeeder::class);
         $this->call(IndexPensumTableSeeder::class);
+        $this->call(RolesTableSeeder::class);
 
     }
 }

@@ -24,7 +24,7 @@ class UserEstadoApiController extends AppbaseController implements HasMiddleware
     public static function middleware(): array
     {
         return [
-            new Middleware('permission:Listar Usuario Estados', only: ['index']),
+            new Middleware('permission:Ver Usuario Estados', only: ['index']),
             new Middleware('permission:Ver Usuario Estados', only: ['show']),
             new Middleware('permission:Crear Usuario Estados', only: ['store']),
             new Middleware('permission:Editar Usuario Estados', only: ['update']),

@@ -12,21 +12,16 @@ class RolesTableSeeder extends Seeder
 {
     /**
      * Run the database seeds.
-     *
+     * Para ejecutar este seeder, se debe ejecutar el comando: php artisan db:seed --class="Database\Seeders\RolesTableSeeder"
      * @return void
      */
     public function run()
     {
-        DB::statement('SET FOREIGN_KEY_CHECKS=0;');
-
-        Role::truncate();
-        Permission::truncate();
-
-        $rolAdministrador = Role::create(['name' => 'Administrador', 'guard_name' => 'web']);
-        $rolProgramador = Role::create(['name' => 'Programador', 'guard_name' => 'web']);
-        $rolEstudiante = Role::create(['name' => 'Estudiante', 'guard_name' => 'web']);
-        $catedratico = Role::create(['name' => 'Catedrático', 'guard_name' => 'web']);
-        $superAdmin = Role::create(['name' => 'Super Admin', 'guard_name' => 'web']);
+        $rolAdministrador = Role::firstOrCreate(['name' => 'Administrador', 'guard_name' => 'web']);
+        $rolProgramador = Role::firstOrCreate(['name' => 'Programador', 'guard_name' => 'web']);
+        $rolEstudiante = Role::firstOrCreate(['name' => 'Estudiante', 'guard_name' => 'web']);
+        $catedratico = Role::firstOrCreate(['name' => 'Catedrático', 'guard_name' => 'web']);
+        $superAdmin = Role::firstOrCreate(['name' => 'Super Admin', 'guard_name' => 'web']);
 
         // Asignar todos los permisos al rol Administrador.
         $rolAdministrador->syncPermissions($this->todosLosPermisos());
@@ -50,21 +45,30 @@ class RolesTableSeeder extends Seeder
         $catedratico->syncPermissions([
             'Listar Inicio',
             'Ver Menu Preferencias',
-            'Ver Modulo Catedratico',
             'Listar Configuraciones',
             'Ver Configuraciones',
             'Actualizar Perfil Usuario',
             'Ver Perfil Usuario',
             'Listar Crear Espacio',
             'Listar Mis Espacios',
+            'Ver Menu Opciones',
+            'Ver Facultades',
+            'Ver Ciclos',
+            'Ver Cursos',
+            'Ver Trabajo Espacios',
+            'Crear Trabajo Espacios',
+            'Ver Usuarios',
+            'Ver Asistencia Sesiones',
+            'Crear Asistencia Sesiones',
+            'Ver Asistencia Sesion Tomas',
+            'Crear Asistencia Sesion Tomas',
+            'Ver Asistencia Registros',
         ]);
 
 
-        User::find(1)->assignRole('Super Admin');
+        User::find(1)->assignRole('Catedrático');
 
-        DB::statement('SET FOREIGN_KEY_CHECKS=1;');
     }
-
     public function todosLosPermisos(): array
     {
         return Permission::all()->pluck('name')->toArray();

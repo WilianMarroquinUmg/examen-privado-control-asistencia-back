@@ -26,7 +26,7 @@ class UserApiController extends AppbaseController implements HasMiddleware
     public static function middleware(): array
     {
         return [
-            new Middleware('permission:Listar Usuarios', only: ['index']),
+            new Middleware('permission:Ver Usuarios', only: ['index']),
             new Middleware('permission:Ver Usuarios', only: ['show', 'obtenerRolesDeUser']),
             new Middleware('permission:Crear Usuarios', only: ['store']),
             new Middleware('permission:Editar Usuarios', only: ['update', 'asignarRolAUser', 'quitarRolAUser']),

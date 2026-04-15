@@ -24,7 +24,7 @@ class AsistenciaConfiguracionApiController extends AppbaseController implements 
     public static function middleware(): array
     {
         return [
-            new Middleware('permission:Listar Asistencia Configuraciones', only: ['index']),
+            new Middleware('permission:Ver Asistencia Configuraciones', only: ['index']),
             new Middleware('permission:Ver Asistencia Configuraciones', only: ['show']),
             new Middleware('permission:Crear Asistencia Configuraciones', only: ['store']),
             new Middleware('permission:Editar Asistencia Configuraciones', only: ['update']),

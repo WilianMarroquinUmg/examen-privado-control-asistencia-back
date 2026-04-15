@@ -33,7 +33,7 @@ class TrabajoEspacioApiController extends AppbaseController implements HasMiddle
     public static function middleware(): array
     {
         return [
-            new Middleware('permission:Listar Trabajo Espacios', only: ['index']),
+            new Middleware('permission:Ver Trabajo Espacios', only: ['index']),
             new Middleware('permission:Ver Trabajo Espacios', only: ['show']),
             new Middleware('permission:Crear Trabajo Espacios', only: ['store']),
             new Middleware('permission:Editar Trabajo Espacios', only: ['update']),

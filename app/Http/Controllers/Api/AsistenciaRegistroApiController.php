@@ -24,7 +24,7 @@ class AsistenciaRegistroApiController extends AppbaseController implements HasMi
     public static function middleware(): array
     {
         return [
-            new Middleware('permission:Listar Asistencia Registros', only: ['index']),
+            new Middleware('permission:Ver Asistencia Registros', only: ['index']),
             new Middleware('permission:Ver Asistencia Registros', only: ['show']),
             new Middleware('permission:Crear Asistencia Registros', only: ['store']),
             new Middleware('permission:Editar Asistencia Registros', only: ['update']),

@@ -26,9 +26,7 @@ class MenuPermisosTableSeeder extends Seeder
         $permisos[] = Permission::create(['name' => 'Listar Ciclos', 'subject' => 'Ciclo', 'guard_name' => 'web',]);
         $permisos[] = Permission::create(['name' => 'Listar Cursos', 'subject' => 'Curso', 'guard_name' => 'web',]);
 
-        $admin = Rol::find(Rol::ADMIN);
 
-        $admin->givePermissionTo($permisos);
 
     }
 

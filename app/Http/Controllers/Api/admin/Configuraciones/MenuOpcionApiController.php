@@ -24,7 +24,7 @@ class MenuOpcionApiController extends AppbaseController implements HasMiddleware
     public static function middleware(): array
     {
         return [
-            new Middleware('permission:Listar Menu Opciones', only: ['index']),
+            new Middleware('permission:Ver Menu Opciones', only: ['index']),
             new Middleware('permission:Ver Menu Opciones', only: ['show', 'index', 'getOpcionesMenu']),
             new Middleware('permission:Crear Menu Opciones', only: ['store']),
             new Middleware('permission:Editar Menu Opciones', only: ['update', 'actualizarOrden']),

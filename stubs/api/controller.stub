@@ -24,7 +24,7 @@ class {{ controlador }} extends AppbaseController implements HasMiddleware
     public static function middleware(): array
     {
         return [
-            new Middleware('permission:Listar {{ variableTitleCase }}', only: ['index']),
+            new Middleware('permission:Ver {{ variableTitleCase }}', only: ['index']),
             new Middleware('permission:Ver {{ variableTitleCase }}', only: ['show']),
             new Middleware('permission:Crear {{ variableTitleCase }}', only: ['store']),
             new Middleware('permission:Editar {{ variableTitleCase }}', only: ['update']),

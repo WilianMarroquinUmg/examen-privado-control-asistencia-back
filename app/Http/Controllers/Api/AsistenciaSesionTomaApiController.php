@@ -25,7 +25,7 @@ class AsistenciaSesionTomaApiController extends AppbaseController implements Has
     public static function middleware(): array
     {
         return [
-            new Middleware('permission:Listar Asistencia Sesion Tomas', only: ['index']),
+            new Middleware('permission:Ver Asistencia Sesion Tomas', only: ['index']),
             new Middleware('permission:Ver Asistencia Sesion Tomas', only: ['show']),
             new Middleware('permission:Crear Asistencia Sesion Tomas', only: ['store']),
             new Middleware('permission:Editar Asistencia Sesion Tomas', only: ['update']),

@@ -8,7 +8,7 @@ class IndexPermisosTableSeeder extends Seeder
 {
     /**
      * Run the database seeds.
-     *
+     * Para ejecutar este seeder php artisan db:seed --class="Database\Seeders\permisos\IndexPermisosTableSeeder"
      * @return void
      */
     public function run()

@@ -24,7 +24,7 @@ class FacultadApiController extends AppbaseController implements HasMiddleware
     public static function middleware(): array
     {
         return [
-            new Middleware('permission:Listar Facultades', only: ['index']),
+            new Middleware('permission:Ver Facultades', only: ['index']),
             new Middleware('permission:Ver Facultades', only: ['show']),
             new Middleware('permission:Crear Facultades', only: ['store']),
             new Middleware('permission:Editar Facultades', only: ['update']),
