@@ -3,12 +3,16 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\AppBaseController;
+use Aws\Exception\AwsException;
+use Aws\Rekognition\RekognitionClient;
 use Illuminate\Routing\Controllers\HasMiddleware;
 use Illuminate\Routing\Controllers\Middleware;
 use App\Http\Requests\Api\UpdateAsistenciaSesionTomaApiRequest;
 use App\Models\AsistenciaSesionToma;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
+use Spatie\QueryBuilder\AllowedFilter;
 use Spatie\QueryBuilder\QueryBuilder;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
@@ -41,23 +45,28 @@ class AsistenciaSesionTomaApiController extends AppbaseController implements Has
     {
         $asistencia_sesion_tomas = QueryBuilder::for(AsistenciaSesionToma::class)
             ->allowedFilters([
-    'hora_apertura',
-    'hora_cierre',
-    'codito_otp',
-    'numero_toma',
-    'sesion_id',
-    'longitud_origen',
-    'latitud_origen'
-])
+                'hora_apertura',
+                'hora_cierre',
+                'codito_otp',
+                'numero_toma',
+                'sesion_id',
+                'longitud_origen',
+                'latitud_origen',
+                AllowedFilter::scope('soloActivasParaAlumno', 'soloActivasParaAlumno'),
+            ])
             ->allowedSorts([
-    'hora_apertura',
-    'hora_cierre',
-    'codito_otp',
-    'numero_toma',
-    'sesion_id',
-    'longitud_origen',
-    'latitud_origen'
-])
+                'hora_apertura',
+                'hora_cierre',
+                'codito_otp',
+                'numero_toma',
+                'sesion_id',
+                'longitud_origen',
+                'latitud_origen'
+            ])
+            ->allowedIncludes([
+                'sesion.espacio.curso',
+                'sesion.configuration'
+            ])
             ->defaultSort('-id') // Ordenar por defecto por fecha descendente
             ->Paginate(request('page.size') ?? 10);
 
@@ -66,7 +75,6 @@ class AsistenciaSesionTomaApiController extends AppbaseController implements Has
 
 
     /**
-
      * Store a newly created AsistenciaSesionToma in storage.
      * POST /asistencia_sesion_tomas
      */
@@ -82,8 +90,8 @@ class AsistenciaSesionTomaApiController extends AppbaseController implements Has
             $input = $request->all();
 
             $input['hora_apertura'] = now();
-            $input['hora_cierre'] = now()->addMinutes($request->input('minutos_tolerancia', 30)); // Agrega minutos de tolerancia a la hora de cierre
-
+            $input['hora_cierre'] = now()->addMinutes($request->input('minutos_tolerancia',
+                30)); // Agrega minutos de tolerancia a la hora de cierre
 
 
             $asistencia_sesion_tomas = AsistenciaSesionToma::create($input);
@@ -98,7 +106,7 @@ class AsistenciaSesionTomaApiController extends AppbaseController implements Has
         } catch (\Exception $e) {
             DB::rollBack();
 
-            Log::error('Error al crear Toma de Asistencia: ' . $e->getMessage(), [
+            Log::error('Error al crear Toma de Asistencia: '.$e->getMessage(), [
                 'request' => $request->all()
             ]);
 
@@ -110,15 +118,19 @@ class AsistenciaSesionTomaApiController extends AppbaseController implements Has
      * Display the specified AsistenciaSesionToma.
      * GET|HEAD /asistencia_sesion_tomas/{id}
      */
-    public function show(AsistenciaSesionToma $asistenciasesiontoma)
+    public function show(AsistenciaSesionToma $asistencia_sesion_toma)
     {
-        return $this->sendResponse($asistenciasesiontoma->toArray(), 'AsistenciaSesionToma recuperado con éxito.');
+        $asistencia_sesion_toma->load([
+           'sesion.espacio.curso',
+           'sesion.configuration',
+        ]);
+        return $this->sendResponse($asistencia_sesion_toma->toArray(), 'AsistenciaSesionToma recuperado con éxito.');
     }
 
     /**
-    * Update the specified AsistenciaSesionToma in storage.
-    * PUT/PATCH /asistencia_sesion_tomas/{id}
-    */
+     * Update the specified AsistenciaSesionToma in storage.
+     * PUT/PATCH /asistencia_sesion_tomas/{id}
+     */
     public function update(UpdateAsistenciaSesionTomaApiRequest $request, $id): JsonResponse
     {
         $asistenciasesiontoma = AsistenciaSesionToma::findOrFail($id);
@@ -127,12 +139,64 @@ class AsistenciaSesionTomaApiController extends AppbaseController implements Has
     }
 
     /**
-    * Remove the specified AsistenciaSesionToma from storage.
-    * DELETE /asistencia_sesion_tomas/{id}
-    */
+     * Remove the specified AsistenciaSesionToma from storage.
+     * DELETE /asistencia_sesion_tomas/{id}
+     */
     public function destroy(AsistenciaSesionToma $asistenciasesiontoma): JsonResponse
     {
         $asistenciasesiontoma->delete();
         return $this->sendResponse(null, 'AsistenciaSesionToma eliminado con éxito.');
+    }
+
+    public function solicitarLiveness(Request $request): JsonResponse
+    {
+        // 1. Validamos que el frontend nos mande la toma a la que se quiere registrar
+        $request->validate([
+            'toma_id' => 'required|exists:asistencia_sesion_tomas,id'
+        ]);
+
+        try {
+            // 2. Instanciamos el cliente de AWS Rekognition
+            // (Laravel tomará las credenciales automáticamente de tu .env)
+            $rekognition = new RekognitionClient([
+                'region'  => env('AWS_DEFAULT_REGION', 'us-east-1'),
+                'version' => 'latest',
+                'credentials' => [
+                    'key'    => env('AWS_ACCESS_KEY_ID'),
+                    'secret' => env('AWS_SECRET_ACCESS_KEY'),
+                ]
+            ]);
+
+            // 3. AWS hace su magia y nos crea un "espacio" para el escaneo facial
+            $result = $rekognition->createFaceLivenessSession([]);
+
+            $sessionId = $result->get('SessionId');
+
+            // 🔥 TIP DE ARQUITECTO:
+            // Aquí podrías guardar temporalmente el $sessionId en la base de datos o en Caché
+            // asociado al alumno y la toma_id, para evitar que usen IDs de otros.
+            // Cache::put("liveness_{$sessionId}", ['toma_id' => $request->toma_id, 'alumno_id' => Auth::id()], now()->addMinutes(10));
+
+            return $this->sendResponse([
+                'session_id' => $sessionId,
+                ],
+                'Liveness session creada exitosamente. Usa este ID para iniciar el escaneo facial.'
+            );
+
+        } catch (AwsException $e) {
+            // AWS falló (Credenciales malas, permisos IAM, región incorrecta)
+            Log::error('AWS Error en Liveness: ' . $e->getAwsErrorMessage(), [
+                'alumno_id' => Auth::id(),
+                'toma_id' => $request->toma_id
+            ]);
+
+            return $this->sendError('Error al crear la sesión de Liveness. Por favor, intenta nuevamente más tarde.', 500);
+
+        } catch (\Exception $e) {
+            // Error general de PHP/Laravel
+            Log::error('Error general al solicitar Liveness: ' . $e->getMessage());
+
+            return $this->sendError('Ocurrió un error inesperado. Por favor, intenta nuevamente más tarde.', 500);
+        }
     }
 }

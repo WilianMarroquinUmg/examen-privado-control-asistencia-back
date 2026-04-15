@@ -42,9 +42,10 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::apiResource('asistencia-sesion-tomas', App\Http\Controllers\Api\AsistenciaSesionTomaApiController::class)
         ->parameters(['asistencia_sesion_tomas' => 'asistenciasesiontoma']);
 
-
     Route::apiResource('asistencia-registros', App\Http\Controllers\Api\AsistenciaRegistroApiController::class)
         ->parameters(['asistencia_registros' => 'asistenciaregistro']);
+
+    Route::post('solicitar-liveness-session', [App\Http\Controllers\Api\AsistenciaSesionTomaApiController::class, 'solicitarLiveness']);
 
 });
 

@@ -3,6 +3,9 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\AppBaseController;
+use App\Models\AsistenciaSesionToma;
+use Aws\Rekognition\RekognitionClient;
+use Carbon\Carbon;
 use Illuminate\Routing\Controllers\HasMiddleware;
 use Illuminate\Routing\Controllers\Middleware;
 use App\Http\Requests\Api\CreateAsistenciaRegistroApiRequest;
@@ -10,6 +13,9 @@ use App\Http\Requests\Api\UpdateAsistenciaRegistroApiRequest;
 use App\Models\AsistenciaRegistro;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 use Spatie\QueryBuilder\QueryBuilder;
 
 /**
@@ -69,18 +75,111 @@ class AsistenciaRegistroApiController extends AppbaseController implements HasMi
         return $this->sendResponse($asistencia_registros, 'asistencia_registros recuperados con éxito.');
     }
 
+    /**
+     * Registra la asistencia validando OTP, GPS (Haversine) y Liveness de AWS.
+     */
+    public function store(Request $request): JsonResponse
+    {
+        DB::beginTransaction();
+
+        try {
+            $user = Auth::user();
+            $toma = AsistenciaSesionToma::with('sesion.configuration')->findOrFail($request->toma_id);
+            $config = $toma->sesion->configuration;
+
+            // 1. Evitar duplicados
+            if (AsistenciaRegistro::where('toma_asistencia_id', $toma->id)->where('alumno_id', $user->id)->exists()) {
+                return $this->sendError('Ya has registrado tu asistencia en esta toma.', [], 400);
+            }
+
+            // 2. Validación de PIN (OTP)
+            if ($config->requiere_codigo_otp && ($request->codigo_otp !== $toma->codito_otp)) {
+                return $this->sendError('El código PIN es incorrecto.', [], 400);
+            }
+
+            // 3. Validación de Coordenadas (Haversine)
+            if ($config->requiere_ubicacion) {
+                if (!$request->filled(['latitud', 'longitud'])) {
+                    return $this->sendError('Coordenadas GPS requeridas.', [], 400);
+                }
+
+                // Calculamos la distancia real en el servidor
+                $distanciaCalculada = $this->calcularDistancia(
+                    (float) $request->latitud, (float) $request->longitud,
+                    (float) $toma->latitud_origen, (float) $toma->longitud_origen
+                );
+
+                // Validamos contra el radio permitido de la toma
+                if ($distanciaCalculada > $toma->radio_metros) {
+                    return $this->sendError("Fuera de rango. Estás a " . round($distanciaCalculada) . "m del punto de origen.", [], 403);
+                }
+            }
+
+            $livenessScore = null;
+            $awsResult = null;
+
+            if ($config->requiere_prueba_vida) {
+                $rekognition = new RekognitionClient([
+                    'region' => env('AWS_DEFAULT_REGION', 'us-east-1'),
+                    'version' => 'latest',
+                    'credentials' => [
+                        'key'    => env('AWS_ACCESS_KEY_ID'),
+                        'secret' => env('AWS_SECRET_ACCESS_KEY'),
+                    ]
+                ]);
+
+                $awsResult = $rekognition->getFaceLivenessSessionResults(['SessionId' => $request->aws_session_id]);
+                $confidence = $awsResult->get('Confidence');
+
+                if ($awsResult->get('Status') !== 'SUCCEEDED' || $confidence < 90.0) {
+                    return $this->sendError('Fallo en la prueba biométrica de vida, Grado de confianza: '. $confidence);
+                }
+                $livenessScore = $confidence;
+            }
+
+            // 5. Creación del Registro
+            $registro = AsistenciaRegistro::create([
+                'hora_registro'      => Carbon::now()->format('H:i:s'),
+                'latitud'            => $request->latitud,
+                'longitud'           => $request->longitud,
+                'aws_liveness_score' => $livenessScore,
+                'fue_aprobada'       => 1,
+                'toma_asistencia_id' => $toma->id,
+                'alumno_id'          => $user->id,
+            ]);
+
+            // 6. Almacenar Imagen de Evidencia (Spatie Media Library)
+            if ($awsResult && $awsResult->hasKey('ReferenceImage')) {
+                $user->addMediaFromBase64(base64_encode($awsResult->get('ReferenceImage')['Bytes']))
+                    ->usingFileName("evidencia_{$user->id}_{$toma->id}_" . time() . ".jpg")
+                    ->toMediaCollection('asistencia_evidencias');
+            }
+
+            DB::commit();
+            return $this->sendResponse($registro->toArray(), '¡Asistencia aprobada y registrada!');
+
+        } catch (\Exception $e) {
+            DB::rollBack();
+            Log::error("Error en registro de asistencia: " . $e->getMessage());
+            return $this->sendError('Error interno al procesar el registro.', 500);
+        }
+    }
 
     /**
-     * Store a newly created AsistenciaRegistro in storage.
-     * POST /asistencia_registros
+     * Calcula la distancia entre dos puntos usando la fórmula de Haversine.
      */
-    public function store(CreateAsistenciaRegistroApiRequest $request): JsonResponse
+    private function calcularDistancia($lat1, $lon1, $lat2, $lon2): float
     {
-        $input = $request->all();
+        $radioTierra = 6371000; // Radio en metros
+        $dLat = deg2rad($lat2 - $lat1);
+        $dLon = deg2rad($lon2 - $lon1);
 
-        $asistencia_registros = AsistenciaRegistro::create($input);
+        $a = sin($dLat / 2) * sin($dLat / 2) +
+            cos(deg2rad($lat1)) * cos(deg2rad($lat2)) *
+            sin($dLon / 2) * sin($dLon / 2);
 
-        return $this->sendResponse($asistencia_registros->toArray(), 'AsistenciaRegistro creado con éxito.');
+        $c = 2 * atan2(sqrt($a), sqrt(1 - $a));
+        return $radioTierra * $c;
     }
 
     /**

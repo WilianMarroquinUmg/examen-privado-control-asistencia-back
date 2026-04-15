@@ -3,8 +3,12 @@
 namespace App\Models;
 
 
+use Carbon\Carbon;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\BelongsToMany;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 
@@ -117,6 +121,25 @@ class AsistenciaSesionToma extends Model
     public function sesion(): BelongsTo
     {
         return $this->belongsTo(AsistenciaSesion::class, 'sesion_id', 'id');
+    }
+
+    public function registros(): HasMany
+    {
+        return $this->hasMany(AsistenciaRegistro::class, 'toma_asistencia_id', 'id');
+    }
+
+    public function scopeSoloActivasParaAlumno(Builder $query, $alumnoId): Builder
+    {
+        $ahora = Carbon::now();
+
+        return $query->whereHas('sesion.espacio.alumnos', function ($q) use ($alumnoId) {
+            $q->where('users.id', $alumnoId);
+        })
+            ->where('hora_apertura', '<=', $ahora)
+            ->where('hora_cierre', '>=', $ahora) // Condición 2: Que el tiempo no se haya agotado
+            ->whereDoesntHave('registros', function ($q) use ($alumnoId) {
+                $q->where('alumno_id', $alumnoId);
+            });
     }
 
 }
