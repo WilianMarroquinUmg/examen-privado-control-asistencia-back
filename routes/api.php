@@ -30,6 +30,8 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::apiResource('cursos', App\Http\Controllers\Api\Pensum\CursoApiController::class)
         ->parameters(['cursos' => 'curso']);
 
+    Route::get('trabajo-espacios-get-asistencias/{espacioId}', [App\Http\Controllers\Api\EspacioTrabajo\TrabajoEspacioApiController::class, 'getListadoAsistencia']);
+
     Route::apiResource('trabajo-espacios', App\Http\Controllers\Api\EspacioTrabajo\TrabajoEspacioApiController::class)
         ->parameters(['trabajo_espacios' => 'trabajoespacio']);
 

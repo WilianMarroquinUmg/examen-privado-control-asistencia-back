@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Api\EspacioTrabajo;
 
 use App\Http\Controllers\AppBaseController;
+use App\Models\AsistenciaSesion;
 use App\Models\User;
 use App\Traits\EspacioTrabajoTrait;
 use Exception;
@@ -15,6 +16,7 @@ use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 use Spatie\QueryBuilder\AllowedFilter;
 use Spatie\QueryBuilder\AllowedInclude;
 use Spatie\QueryBuilder\QueryBuilder;
@@ -171,4 +173,79 @@ class TrabajoEspacioApiController extends AppbaseController implements HasMiddle
         $trabajo_espacio->delete();
         return $this->sendResponse(null, 'TrabajoEspacio eliminado con éxito.');
     }
+
+    public function getListadoAsistencia($espacioId)
+    {
+//        $request->validate([
+//            'espacio_id' => 'required|exists:trabajo_espacios,id',
+//        ]);
+
+        try {
+            // 1. Traer las sesiones válidas con sus relaciones (Puro Eloquent)
+            $sesiones = AsistenciaSesion::with(['configuration', 'tomas'])
+                ->where('espacio_id', $espacioId)
+                ->where('fecha', '<=', now())
+                ->get();
+
+            $totalSesiones = $sesiones->count();
+
+            // Extraemos un arreglo plano (array de IDs) con todas las tomas de estas sesiones
+            $tomasValidasIds = $sesiones->pluck('tomas')->flatten()->pluck('id');
+
+            // 2. Traer el espacio con los alumnos y precargar (Eager Load) solo sus registros útiles
+            $espacio = TrabajoEspacio::with(['alumnos' => function ($query) use ($tomasValidasIds) {
+                $query->with(['asistenciaRegistros' => function ($rq) use ($tomasValidasIds) {
+                    // Filtramos para traer solo registros aprobados que pertenezcan a las tomas del curso
+                    $rq->whereIn('toma_asistencia_id', $tomasValidasIds)
+                        ->where('fue_aprobada', 1);
+                }]);
+            }])->findOrFail($espacioId);
+
+            // 3. Procesamiento Matemático con Collections (La Magia de Laravel)
+            $dataReporte = $espacio->alumnos->map(function (User $alumno) use ($sesiones, $totalSesiones) {
+                $sesionesCompletadas = 0;
+
+                // Extraemos solo los IDs de las tomas a las que asistió este alumno
+                $tomasAsistidasIds = $alumno->asistenciaRegistros->pluck('toma_asistencia_id');
+
+                // Evaluamos sesión por sesión
+                foreach ($sesiones as $sesion) {
+                    $tomasRequeridas = (int) $sesion->configuration->cantidad_tomas_requeridas;
+                    $tomasDeEstaSesionIds = $sesion->tomas->pluck('id');
+
+                    // 🔥 EL TRUCO SENIOR: Intersect
+                    // Comparamos las tomas de la sesión con las tomas que el alumno registró.
+                    // Si la sesión tiene las tomas [1, 2, 3] y el alumno fue a [2, 3, 4], intersect devuelve [2, 3].
+                    $coincidencias = $tomasDeEstaSesionIds->intersect($tomasAsistidasIds)->count();
+
+                    // Validamos la regla estricta
+                    if ($coincidencias >= $tomasRequeridas) {
+                        $sesionesCompletadas++;
+                    }
+                }
+
+                // Calculamos porcentaje
+                $porcentaje = $totalSesiones > 0 ? round(($sesionesCompletadas / $totalSesiones) * 100, 2) : 0;
+
+                return [
+                    'id' => $alumno->id,
+                    'nombre' => $alumno->nombre_completo,
+                    'carnet' => $alumno->carnet ?? 'Sin Carnet',
+                    'asistencias_completas' => $sesionesCompletadas,
+                    'total_sesiones' => $totalSesiones,
+                    'porcentaje' => $porcentaje,
+                    'estado' => $porcentaje >= 75 ? 'Cumple' : 'En Riesgo Crítico'
+                ];
+            });
+
+            return $this->sendResponse($dataReporte, 'Reporte generado con éxito.');
+
+        } catch (\Exception $e) {
+            Log::error("Error en reporte estricto Eloquent: " . $e->getMessage());
+            return $this->sendError('Error al generar el reporte estricto.', 500);
+        }
+
+    }
+
+
 }

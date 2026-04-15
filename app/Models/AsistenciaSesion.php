@@ -93,32 +93,30 @@ class AsistenciaSesion extends Model
     const EN_CURSO = 'En curso';
     const FINALIZADA = 'Finalizada';
 
+    protected $appends = ['estado'];
 
-    protected function estado(): Attribute
+
+    public function getEstadoAttribute(): ?string
     {
-        return Attribute::make(
-            get: function ($value) {
-                if (!$this->relationLoaded('tomas') || !$this->relationLoaded('configuration')) {
-                    return $value;
-                }
+        if (!$this->relationLoaded('tomas') || !$this->relationLoaded('configuration')) {
+            return null;
+        }
 
-                $tomasRealizadas = $this->tomas->count();
-                $tomasRequeridas = (int) $this->configuration->cantidad_tomas_requeridas;
+        $tomasRealizadas = $this->tomas->count();
+        $tomasRequeridas = (int) $this->configuration->cantidad_tomas_requeridas;
 
-                if ($tomasRealizadas === 0) {
-                    return 'Pendiente';
-                }
+        if ($tomasRealizadas === 0) {
+            return 'Pendiente';
+        }
 
-                $ultimaToma = $this->tomas->sortByDesc('id')->first();
-                $ultimaFinalizada = $ultimaToma && $ultimaToma->estado === 'Finalizada';
+        $ultimaToma = $this->tomas->sortByDesc('id')->first();
+        $ultimaFinalizada = $ultimaToma && $ultimaToma->estado === 'Finalizada';
 
-                if ($tomasRealizadas == $tomasRequeridas && $ultimaFinalizada) {
-                    return 'Finalizada';
-                }
+        if ($tomasRealizadas == $tomasRequeridas && $ultimaFinalizada) {
+            return 'Finalizada';
+        }
 
-                return 'En curso';
-            }
-        );
+        return 'En curso';
     }
 
     /**

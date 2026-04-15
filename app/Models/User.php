@@ -5,6 +5,7 @@ namespace App\Models;
 // use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Spatie\MediaLibrary\HasMedia;
@@ -13,7 +14,7 @@ use Spatie\MediaLibrary\MediaCollections\Models\Media;
 use Spatie\Permission\Traits\HasRoles;
 
 /**
- * 
+ *
  *
  * @property int $id
  * @property string $primer_nombre
@@ -239,6 +240,11 @@ class User extends Authenticatable implements HasMedia
         $arregloIds = is_string($ids) ? explode('-', $ids) : $ids;
 
         return $query->whereNotIn('id', $arregloIds);
+    }
+
+    public function asistenciaRegistros(): HasMany
+    {
+        return $this->hasMany(AsistenciaRegistro::class, 'alumno_id');
     }
 
 }

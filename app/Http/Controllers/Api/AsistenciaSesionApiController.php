@@ -43,15 +43,17 @@ class AsistenciaSesionApiController extends AppbaseController implements HasMidd
         $asistencia_sesiones = QueryBuilder::for(AsistenciaSesion::class)
             ->allowedFilters([
                 'fecha',
-                'estado',
                 'espacio_id'
             ])
             ->allowedSorts([
                 'fecha',
-                'estado',
                 'espacio_id'
             ])
-            ->defaultSort('-id') // Ordenar por defecto por fecha descendente
+            ->allowedIncludes([
+                'tomas',
+                'configuration'
+            ])
+            ->defaultSort('-id')
             ->Paginate(request('page.size') ?? 10);
 
         return $this->sendResponse($asistencia_sesiones, 'asistencia_sesiones recuperados con éxito.');
