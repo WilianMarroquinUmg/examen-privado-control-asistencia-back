@@ -14,7 +14,6 @@ return new class extends Migration
         Schema::create('asistencia_sesiones', function (Blueprint $table) {
             $table->bigIncrements('id');
             $table->date('fecha');
-            $table->enum('estado', ['En curso', 'Finalizada']);
             $table->unsignedBigInteger('espacio_id')->index('fk_asistencia_sesiones_trabajo_espacios1_idx');
             $table->unsignedBigInteger('configuracion_id')->index('fk_configuraciones_fk_idx');
             $table->timestamps();

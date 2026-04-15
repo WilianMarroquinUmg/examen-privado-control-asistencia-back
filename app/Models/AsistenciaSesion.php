@@ -4,8 +4,10 @@ namespace App\Models;
 
 
 use App\Models\EspacioTrabajo\TrabajoEspacio;
+use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 
@@ -47,7 +49,6 @@ class AsistenciaSesion extends Model
 
     protected $fillable = [
         'fecha',
-        'estado',
         'espacio_id',
         'configuracion_id'
     ];
@@ -61,7 +62,6 @@ class AsistenciaSesion extends Model
     protected $casts = [
         'id' => 'integer',
         'fecha' => 'date',
-        'estado' => 'string',
         'espacio_id' => 'integer',
         'created_at' => 'timestamp',
         'updated_at' => 'timestamp',
@@ -76,7 +76,6 @@ class AsistenciaSesion extends Model
      */
     public static $rules = [
         'fecha' => 'required|date',
-        'estado' => 'required|string',
         'espacio_id' => 'required|integer',
     ];
 
@@ -90,8 +89,37 @@ class AsistenciaSesion extends Model
 
     ];
 
+    const PENDIENTE = 'Pendiente';
     const EN_CURSO = 'En curso';
     const FINALIZADA = 'Finalizada';
+
+
+    protected function estado(): Attribute
+    {
+        return Attribute::make(
+            get: function ($value) {
+                if (!$this->relationLoaded('tomas') || !$this->relationLoaded('configuration')) {
+                    return $value;
+                }
+
+                $tomasRealizadas = $this->tomas->count();
+                $tomasRequeridas = (int) $this->configuration->cantidad_tomas_requeridas;
+
+                if ($tomasRealizadas === 0) {
+                    return 'Pendiente';
+                }
+
+                $ultimaToma = $this->tomas->sortByDesc('id')->first();
+                $ultimaFinalizada = $ultimaToma && $ultimaToma->estado === 'Finalizada';
+
+                if ($tomasRealizadas == $tomasRequeridas && $ultimaFinalizada) {
+                    return 'Finalizada';
+                }
+
+                return 'En curso';
+            }
+        );
+    }
 
     /**
      * Accessor for relationships
@@ -109,7 +137,7 @@ class AsistenciaSesion extends Model
 
     }
 
-    public function tomas()
+    public function tomas(): HasMany
     {
         return $this->hasMany(AsistenciaSesionToma::class, 'sesion_id', 'id');
 

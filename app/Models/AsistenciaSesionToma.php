@@ -5,6 +5,7 @@ namespace App\Models;
 
 use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
@@ -112,6 +113,20 @@ class AsistenciaSesionToma extends Model
 
     ];
 
+    protected $appends = ['estado'];
+
+    protected function estado(): Attribute
+    {
+        return Attribute::make(
+            get: function () {
+                if (!$this->hora_cierre) return 'En curso';
+
+                return Carbon::now()->greaterThanOrEqualTo($this->hora_cierre)
+                    ? 'Finalizada'
+                    : 'En curso';
+            }
+        );
+    }
 
     /**
      * Accessor for relationships
