@@ -89,7 +89,7 @@ class AsistenciaRegistroApiController extends AppbaseController implements HasMi
 
             // 1. Evitar duplicados
             if (AsistenciaRegistro::where('toma_asistencia_id', $toma->id)->where('alumno_id', $user->id)->exists()) {
-                return $this->sendError('Ya has registrado tu asistencia en esta toma.', [], 400);
+                return $this->sendError('Ya has registrado tu asistencia en esta toma.', 400);
             }
 
             // 2. Validación de PIN (OTP)
@@ -100,26 +100,32 @@ class AsistenciaRegistroApiController extends AppbaseController implements HasMi
             // 3. Validación de Coordenadas (Haversine)
             if ($config->requiere_ubicacion) {
                 if (!$request->filled(['latitud', 'longitud'])) {
-                    return $this->sendError('Coordenadas GPS requeridas.', [], 400);
+                    return $this->sendError('Coordenadas GPS requeridas.', 400);
                 }
 
-                // Calculamos la distancia real en el servidor
                 $distanciaCalculada = $this->calcularDistancia(
                     (float) $request->latitud, (float) $request->longitud,
                     (float) $toma->latitud_origen, (float) $toma->longitud_origen
                 );
 
-                // Validamos contra el radio permitido de la toma
                 if ($distanciaCalculada > $toma->radio_metros) {
-                    return $this->sendError("Fuera de rango. Estás a " . round($distanciaCalculada) . "m del punto de origen.", [], 403);
+                    return $this->sendError("Fuera de rango. Estás a " . round($distanciaCalculada) . "m del punto de origen.", 403);
                 }
             }
 
             $livenessScore = null;
             $awsResult = null;
+            $similitudFacial = null; // Guardaremos esto si queremos auditoría
 
+            // 4. VALIDACIÓN BIOMÉTRICA DUAL (Liveness + CompareFaces)
             if ($config->requiere_prueba_vida) {
-                $rekognition = new RekognitionClient([
+
+                // 4.0 Seguridad Preventiva: ¿Tiene foto certificada?
+                if (!$user->tiene_foto_certificada) {
+                    return $this->sendError('No tienes un perfil biométrico certificado. No puedes registrar asistencia por IA.', 403);
+                }
+
+                $rekognition = new \Aws\Rekognition\RekognitionClient([
                     'region' => env('AWS_DEFAULT_REGION', 'us-east-1'),
                     'version' => 'latest',
                     'credentials' => [
@@ -128,13 +134,43 @@ class AsistenciaRegistroApiController extends AppbaseController implements HasMi
                     ]
                 ]);
 
+                // 4.1 FASE 1: ¿Es un humano vivo? (Liveness)
                 $awsResult = $rekognition->getFaceLivenessSessionResults(['SessionId' => $request->aws_session_id]);
                 $confidence = $awsResult->get('Confidence');
 
                 if ($awsResult->get('Status') !== 'SUCCEEDED' || $confidence < 90.0) {
-                    return $this->sendError('Fallo en la prueba biométrica de vida, Grado de confianza: '. $confidence);
+                    return $this->sendError('Fallo en la prueba biométrica de vida. Grado de confianza: '. round($confidence, 2) . '%', 401);
                 }
                 $livenessScore = $confidence;
+
+                // 4.2 FASE 2: ¿Es el alumno correcto? (CompareFaces)
+                // Extraemos los bytes de la foto maestra desde Spatie usando Streams (funciona en local y en S3)
+                $fotoMaestra = $user->fotoCertificada;
+                $stream = $fotoMaestra->stream();
+                $bytesFotoMaestra = stream_get_contents($stream);
+                fclose($stream);
+
+                // Extraemos los bytes de la foto en vivo que capturó el Liveness
+                $bytesFotoEnVivo = $awsResult->get('ReferenceImage')['Bytes'];
+
+                // Comparamos
+                $compareResult = $rekognition->compareFaces([
+                    'SourceImage' => [
+                        'Bytes' => $bytesFotoMaestra,
+                    ],
+                    'TargetImage' => [
+                        'Bytes' => $bytesFotoEnVivo,
+                    ],
+                    'SimilarityThreshold' => 85.0, // 85% es un buen margen para lentes/barba/cortes de pelo
+                ]);
+
+                // Si AWS devuelve un array de 'FaceMatches' vacío, significa que es OTRA persona
+                if (empty($compareResult->get('FaceMatches'))) {
+                    return $this->sendError('Alerta de Fraude: El rostro validado no coincide con el perfil certificado de este alumno.', [], 403);
+                }
+
+                // Si hace match, guardamos el porcentaje (opcional, por si lo agregas a la BD)
+                $similitudFacial = $compareResult->get('FaceMatches')[0]['Similarity'];
             }
 
             // 5. Creación del Registro
@@ -146,21 +182,22 @@ class AsistenciaRegistroApiController extends AppbaseController implements HasMi
                 'fue_aprobada'       => 1,
                 'toma_asistencia_id' => $toma->id,
                 'alumno_id'          => $user->id,
+                // 'similitud_facial'   => $similitudFacial, // Descomenta si agregas esta columna a tu DB para auditorías
             ]);
 
             // 6. Almacenar Imagen de Evidencia (Spatie Media Library)
             if ($awsResult && $awsResult->hasKey('ReferenceImage')) {
-                $user->addMediaFromBase64(base64_encode($awsResult->get('ReferenceImage')['Bytes']))
+                $user->addMediaFromBase64(base64_encode($bytesFotoEnVivo))
                     ->usingFileName("evidencia_{$user->id}_{$toma->id}_" . time() . ".jpg")
                     ->toMediaCollection('asistencia_evidencias');
             }
 
             DB::commit();
-            return $this->sendResponse($registro->toArray(), '¡Asistencia aprobada y registrada!');
+            return $this->sendResponse($registro->toArray(), '¡Asistencia biométrica verificada y aprobada!');
 
         } catch (\Exception $e) {
             DB::rollBack();
-            Log::error("Error en registro de asistencia: " . $e->getMessage());
+            Log::error("Error en registro de asistencia (User ID: " . Auth::id() . "): " . $e->getMessage());
             return $this->sendError('Error interno al procesar el registro.', 500);
         }
     }
