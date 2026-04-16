@@ -39,10 +39,10 @@ class ExportableDataTableApiController extends AppBaseController
                 $request->input('columns', [])
             );
 
-            $columnasExportables = array_filter(
-                $request->input('columns'),
-                fn($col) => $col['exportable'] ?? true
-            );
+            $columnasExportables = array_values(array_filter(
+                $request->input('columns', []),
+                fn($col) => filter_var($col['exportable'] ?? true, FILTER_VALIDATE_BOOLEAN)
+            ));
 
             $format = $request->input('format', 'xlsx');
 
@@ -63,7 +63,7 @@ class ExportableDataTableApiController extends AppBaseController
                         : 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
                 ]);
         } catch (Exception $e) {
-            return $this->sendError('Error al exportar: ' . $e->getMessage());
+            return $this->sendError('Error al exportar Excel: ' . $e->getMessage());
         }
     }
 

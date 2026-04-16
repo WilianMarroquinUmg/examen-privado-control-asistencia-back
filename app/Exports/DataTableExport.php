@@ -1,6 +1,7 @@
 <?php
 namespace App\Exports;
 
+use Illuminate\Support\Facades\Log;
 use Maatwebsite\Excel\Concerns\FromQuery;
 use Maatwebsite\Excel\Concerns\WithHeadings; // <--- 1. Importante
 use Maatwebsite\Excel\Concerns\WithMapping;
@@ -28,6 +29,13 @@ class DataTableExport implements FromQuery, WithHeadings, WithMapping, ShouldAut
     // MAPEO DE DATOS (FILAS)
     public function map($row): array
     {
+        $datos = array_map(function ($col) use ($row) {
+            // data_get es vital para relaciones como 'gerencia.nombre'
+            return data_get($row, $col['key']);
+        }, $this->columns);
+
+        Log::info('Datos: ' . print_r($datos, true));
+
         return array_map(function ($col) use ($row) {
             // data_get es vital para relaciones como 'gerencia.nombre'
             return data_get($row, $col['key']);
@@ -37,6 +45,9 @@ class DataTableExport implements FromQuery, WithHeadings, WithMapping, ShouldAut
     // ENCABEZADOS (HEADERS)
     public function headings(): array
     {
+        $columns = array_column($this->columns, 'title');
+
+        Log::info('Headings: ' . print_r($columns, true));
         // <--- 2. AQUI ESTABA EL DETALLE
         // Tu array de columnas viene con 'title' desde el front, no con 'label'
         return array_column($this->columns, 'title');
