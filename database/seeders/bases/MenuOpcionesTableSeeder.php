@@ -48,6 +48,13 @@ class MenuOpcionesTableSeeder extends Seeder
                 "subject" => "Certificación",
             ],
             [
+                "titulo" => "Ajustes",
+                "icono" => "ri-settings-3-fill",
+                "ruta" => "ajustes-estudiante",
+                "action" => "Listar Ajustes Estudiante",
+                "subject" => "Ajustes",
+            ],
+            [
                 "titulo_seccion" => "Administración",
                 "action" => "Ver Modulo Usuarios",
                 "subject" => "User",

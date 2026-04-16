@@ -66,6 +66,18 @@ class RolesTableSeeder extends Seeder
             'Listar Certificar Fotos',
         ]);
 
+        $rolEstudiante->syncPermissions([
+            'Listar Inicio',
+            'Ver Menu Preferencias',
+            'Listar Configuraciones',
+            'Ver Configuraciones',
+            'Actualizar Perfil Usuario',
+            'Ver Perfil Usuario',
+            'Listar Ajustes Estudiante',
+            'Ver Asistencia Sesion Tomas',
+            'Crear Asistencia Registros',
+            'Ver Menu Opciones',
+        ]);
 
         User::find(1)->assignRole('Catedrático');
 

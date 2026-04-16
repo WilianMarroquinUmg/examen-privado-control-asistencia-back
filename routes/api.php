@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\Api\Pensum\CicloApiController;
 use App\Http\Controllers\Api\Pensum\FacultadApiController;
+use App\Http\Controllers\Api\PerfilBiometricoApiController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
@@ -12,6 +13,15 @@ Route::middleware(['auth:sanctum'])->get('/user', function (Request $request) {
 Route::middleware('auth:sanctum')->group(function () {
 
     require __DIR__.'/admin/api.php';
+
+    Route::get('perfil-biometrico', [PerfilBiometricoApiController::class, 'show']);
+    Route::post('perfil-biometrico', [PerfilBiometricoApiController::class, 'store']);
+
+    Route::prefix('admin-perfiles-biometricos')->group(function () {
+        Route::get('/{id}', [PerfilBiometricoApiController::class, 'showInfoAlumno']);
+        Route::post('/{id}/certificar', [PerfilBiometricoApiController::class, 'certificar']);
+        Route::post('/{id}/rechazar', [PerfilBiometricoApiController::class, 'rechazar']);
+    });
 
     Route::post('facultad-asociar-ciclo', [FacultadApiController::class, 'asociarCiclo']);
 

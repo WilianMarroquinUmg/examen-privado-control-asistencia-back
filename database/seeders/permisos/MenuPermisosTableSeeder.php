@@ -24,6 +24,7 @@ class MenuPermisosTableSeeder extends Seeder
         Permission::firstOrCreate(['name' => 'Listar Ciclos', 'subject' => 'Ciclo', 'guard_name' => 'web',]);
         Permission::firstOrCreate(['name' => 'Listar Cursos', 'subject' => 'Curso', 'guard_name' => 'web',]);
         Permission::firstOrCreate(['name' => 'Listar Certificar Fotos', 'subject' => 'Certificación', 'guard_name' => 'web',]);
+        Permission::firstOrCreate(['name' => 'Listar Ajustes Estudiante', 'subject' => 'Ajustes', 'guard_name' => 'web',]);
     }
 
 }
