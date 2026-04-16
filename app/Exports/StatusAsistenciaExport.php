@@ -31,8 +31,7 @@ class StatusAsistenciaExport implements FromArray, WithHeadings, WithMapping, Sh
         return [
             'Carnet',
             'Estudiante',
-            'Sesiones Asistidas',
-            'Total Sesiones',
+            'Sesiones',
             'Porcentaje',
             'Estado'
         ];
@@ -51,8 +50,7 @@ class StatusAsistenciaExport implements FromArray, WithHeadings, WithMapping, Sh
         return [
             $row['carnet'] ?? '',
             $nombre,
-            $asistidas,
-            $total,
+            ((int)$asistidas) . ' / ' . ((int)$total),
             $porcentaje . '%',
             $estado
         ];
