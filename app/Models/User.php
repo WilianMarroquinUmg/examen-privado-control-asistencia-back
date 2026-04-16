@@ -85,6 +85,8 @@ class User extends Authenticatable implements HasMedia
         'segundo_apellido',
         'email',
         'password',
+        'carnet',
+        'estado_id',
     ];
 
     protected $hidden = [
@@ -126,6 +128,7 @@ class User extends Authenticatable implements HasMedia
             'primer_apellido' => $this->primer_apellido,
             'segundo_apellido' => $this->segundo_apellido,
             'nombre_completo' => $this->nombre_completo,
+            'tiene_foto_certificada' => $this->tiene_foto_certificada,
             'usuario' => $this->usuario,
             'email' => $this->email,
             'estado' => $this->estado()->select('id', 'nombre')->first(),
@@ -161,8 +164,8 @@ class User extends Authenticatable implements HasMedia
     {
         return $this->morphOne(Media::class, 'model')
             ->where('collection_name', 'foto_perfil_biometrico')
-            ->where('fue_certificada', true) // Filtramos por el nuevo campo booleano
-            ->latestOfMany(); // Por si tiene varias, traemos la más reciente
+            ->where('fue_certificada', 1) // Es más seguro usar 1 en bases de datos relacionales
+            ->latest('id'); // 🚀 MAGIA: Ordena de mayor a menor y el morphOne saca el primero
     }
 
     /**
@@ -247,5 +250,12 @@ class User extends Authenticatable implements HasMedia
     public function asistenciaRegistros(): HasMany
     {
         return $this->hasMany(AsistenciaRegistro::class, 'alumno_id');
+    }
+
+    public function scopeSoloAlumnos(Builder $query)
+    {
+        return $query->whereHas('roles', function (Builder $q) {
+            $q->where('name', 'Estudiante');
+        });
     }
 }

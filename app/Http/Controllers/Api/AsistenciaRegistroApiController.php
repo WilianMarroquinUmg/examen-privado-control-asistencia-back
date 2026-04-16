@@ -166,7 +166,7 @@ class AsistenciaRegistroApiController extends AppbaseController implements HasMi
 
                 // Si AWS devuelve un array de 'FaceMatches' vacío, significa que es OTRA persona
                 if (empty($compareResult->get('FaceMatches'))) {
-                    return $this->sendError('Alerta de Fraude: El rostro validado no coincide con el perfil certificado de este alumno.', [], 403);
+                    return $this->sendError('Alerta de Fraude: El rostro validado no coincide con el perfil certificado de este alumno.', 403);
                 }
 
                 // Si hace match, guardamos el porcentaje (opcional, por si lo agregas a la BD)

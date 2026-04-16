@@ -27,7 +27,8 @@ class PruebasCommand extends Command
     public function handle()
     {
 
-        $user = User::find(1);
+        $user = User::with('fotoCertificada')
+        ->find(38);
 
         dd($user->toArray());
 

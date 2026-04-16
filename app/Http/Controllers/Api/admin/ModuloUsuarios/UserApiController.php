@@ -7,6 +7,7 @@ use App\Http\Requests\Api\admin\ModuloUsuarios\CreateUserApiRequest;
 use App\Http\Requests\Api\admin\ModuloUsuarios\UpdateUserApiRequest;
 use App\Models\Rol;
 use App\Models\User;
+use App\Models\UserEstado;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Routing\Controllers\HasMiddleware;
@@ -56,6 +57,7 @@ class UserApiController extends AppbaseController implements HasMiddleware
                 AllowedFilter::scope('busquedaAvanzada', 'busquedaAvanzada'),
                 AllowedFilter::scope('sinUsuarioIds', 'sinUsuarioIds'),
                 AllowedFilter::scope('soloPendientesDeCertificacion', 'soloPendientesDeCertificacion'),
+                AllowedFilter::scope('soloAlumnos', 'soloAlumnos'),
             ])
             ->allowedSorts([
                 'id',
@@ -86,6 +88,8 @@ class UserApiController extends AppbaseController implements HasMiddleware
         }
 
         $input['password'] = bcrypt($input['password']);
+
+        $input['estado_id'] = UserEstado::ACTIVO;
 
         $users = User::create($input);
 
