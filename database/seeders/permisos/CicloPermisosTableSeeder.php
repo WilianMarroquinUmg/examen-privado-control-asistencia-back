@@ -24,7 +24,7 @@ class CicloPermisosTableSeeder extends Seeder
         ];
 
         foreach ($permisos as $permiso) {
-            Permission::create([
+            Permission::firstOrCreate([
                 'name' => $permiso,
                 'subject' => 'Ciclo',
                 'guard_name' => 'web',

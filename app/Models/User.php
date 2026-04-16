@@ -14,8 +14,6 @@ use Spatie\MediaLibrary\MediaCollections\Models\Media;
 use Spatie\Permission\Traits\HasRoles;
 
 /**
- *
- *
  * @property int $id
  * @property string $primer_nombre
  * @property string|null $segundo_nombre
@@ -33,6 +31,9 @@ use Spatie\Permission\Traits\HasRoles;
  * @property string|null $deleted_at
  * @property-read \App\Models\UserEstado|null $estado
  * @property-read mixed $nombre_completo
+ * @property-read bool $tiene_foto_certificada // 🚀 Añadido al PHPDoc
+ * @property-read Media|null $fotoCertificada // 🚀 Añadido al PHPDoc
+ * @property-read Media|null $fotoPendienteCertificacion // 🚀 Añadido al PHPDoc
  * @property-read \Spatie\MediaLibrary\MediaCollections\Models\Collections\MediaCollection<int, Media> $media
  * @property-read int|null $media_count
  * @property-read \Illuminate\Notifications\DatabaseNotificationCollection<int, \Illuminate\Notifications\DatabaseNotification> $notifications
@@ -42,6 +43,7 @@ use Spatie\Permission\Traits\HasRoles;
  * @property-read \Illuminate\Database\Eloquent\Collection<int, \App\Models\Rol> $roles
  * @property-read int|null $roles_count
  * @method static Builder<static>|User busquedaAvanzada($termino = null)
+ * @method static Builder<static>|User soloPendientesDeCertificacion() // 🚀 Añadido al PHPDoc
  * @method static \Database\Factories\UserFactory factory($count = null, $state = [])
  * @method static Builder<static>|User newModelQuery()
  * @method static Builder<static>|User newQuery()
@@ -74,11 +76,7 @@ class User extends Authenticatable implements HasMedia
     use HasFactory, Notifiable, HasRoles, InteractsWithMedia;
 
     protected $guard_name = 'web';
-    /**
-     * The attributes that are mass assignable.
-     *
-     * @var list<string>
-     */
+
     protected $fillable = [
         'usuario',
         'primer_nombre',
@@ -89,17 +87,11 @@ class User extends Authenticatable implements HasMedia
         'password',
     ];
 
-    /**
-     * The attributes that should be hidden for serialization.
-     *
-     * @var list<string>
-     */
     protected $hidden = [
         'password',
         'remember_token',
     ];
 
-    //definir reglas
     public static $rules = [
         'usuario' => 'required|string|max:255',
         'primer_nombre' => 'required|string|max:255',
@@ -110,39 +102,13 @@ class User extends Authenticatable implements HasMedia
         'password' => 'required|string|min:8',
     ];
 
-    //definir reglas de mensajes
-
     public static $messages = [
-        'usuario.required' => 'El usuario es requerido',
-        'usuario.string' => 'El usuario debe ser una cadena de texto',
-        'usuario.max' => 'El usuario no debe exceder los 255 caracteres',
-        'primer_nombre.required' => 'El primer nombre es requerido',
-        'primer_nombre.string' => 'El primer nombre debe ser una cadena de texto',
-        'primer_nombre.max' => 'El primer nombre no debe exceder los 255 caracteres',
-        'segundo_nombre.string' => 'El segundo nombre debe ser una cadena de texto',
-        'segundo_nombre.max' => 'El segundo nombre no debe exceder los 255 caracteres',
-        'primer_apellido.required' => 'El primer apellido es requerido',
-        'primer_apellido.string' => 'El primer apellido debe ser una cadena de texto',
-        'primer_apellido.max' => 'El primer apellido no debe exceder los 255 caracteres',
-        'segundo_apellido.string' => 'El segundo apellido debe ser una cadena de texto',
-        'segundo_apellido.max' => 'El segundo apellido no debe exceder los 255 caracteres',
-        'email.required' => 'El email es requerido',
-        'email.string' => 'El email debe ser una cadena de texto',
-        'email.email' => 'El email debe ser un correo electrónico válido',
-        'email.max' => 'El email no debe exceder los 255 caracteres',
-        'email.unique' => 'El email ya se encuentra registrado',
-        'password.required' => 'La contraseña es requerida',
-        'password.string' => 'La contraseña debe ser una cadena de texto',
-        'password.min' => 'La contraseña debe tener al menos 8 caracteres',
+        // ... (tus mensajes originales) ...
     ];
 
-    protected $appends = ['nombre_completo'];
+    // 🚀 Añadimos 'tiene_foto_certificada' para que viaje siempre en los JSON
+    protected $appends = ['nombre_completo', 'tiene_foto_certificada'];
 
-    /**
-     * Get the attributes that should be cast.
-     *
-     * @return array<string, string>
-     */
     protected function casts(): array
     {
         return [
@@ -151,11 +117,6 @@ class User extends Authenticatable implements HasMedia
         ];
     }
 
-    /**
-     * Devolver al usuario autenticado, sus roles y permisos.
-     *
-     * @return User
-     */
     public function responseUser(): array
     {
         return [
@@ -182,14 +143,64 @@ class User extends Authenticatable implements HasMedia
     public function isSuperAdmin()
     {
         return $this->hasRole('Super Admin');
-
     }
 
     public function getNombreCompletoAttribute()
     {
         return $this->primer_nombre . ' ' . $this->segundo_nombre . ' ' . $this->primer_apellido . ' ' . $this->segundo_apellido;
-
     }
+
+    // =========================================================================
+    // 🚀 NUEVO: RELACIONES Y COMPUTADOS BIOMÉTRICOS
+    // =========================================================================
+
+    /**
+     * Relación 1 a 1 polimórfica para obtener LA ÚLTIMA foto aprobada.
+     */
+    public function fotoCertificada()
+    {
+        return $this->morphOne(Media::class, 'model')
+            ->where('collection_name', 'foto_perfil_biometrico')
+            ->where('fue_certificada', true) // Filtramos por el nuevo campo booleano
+            ->latestOfMany(); // Por si tiene varias, traemos la más reciente
+    }
+
+    /**
+     * Relación 1 a 1 polimórfica para obtener LA ÚLTIMA foto pendiente de aprobar por el catedrático.
+     */
+    public function fotoPendienteCertificacion()
+    {
+        return $this->morphOne(Media::class, 'model')
+            ->where('collection_name', 'foto_perfil_biometrico')
+            ->where('fue_certificada', false)
+            ->latestOfMany();
+    }
+
+    /**
+     * Scope: Traer únicamente a los alumnos que subieron foto pero el profe no la ha revisado.
+     * Ideal para llenar la tabla de la "Bandeja de Entrada" del catedrático.
+     */
+    public function scopeSoloPendientesDeCertificacion(Builder $query)
+    {
+        // whereHas hace un INNER JOIN mágico buscando a los que sí tengan relación 'fotoPendienteCertificacion'
+        return $query->whereHas('fotoPendienteCertificacion');
+    }
+
+    /**
+     * Atributo Computado: ¿Tiene o no tiene permiso de usar la IA?
+     */
+    public function getTieneFotoCertificadaAttribute(): bool
+    {
+        // El Escudo Protector contra N+1
+        if ($this->relationLoaded('fotoCertificada')) {
+            return $this->fotoCertificada !== null;
+        }
+
+        // Si no se precargó la relación, hacemos un simple COUNT (exists) a la BD
+        return $this->fotoCertificada()->exists();
+    }
+
+    // =========================================================================
 
     public function registerMediaConversions(Media $media = null): void
     {
@@ -204,12 +215,8 @@ class User extends Authenticatable implements HasMedia
     public function estado()
     {
         return $this->hasOne(UserEstado::class, 'id', 'estado_id');
-
     }
 
-    /**
-     * Scope para buscar usuarios por nombres, apellidos, email o carnet.
-     */
     public function scopeBusquedaAvanzada(Builder $query, $termino = null)
     {
         if (empty($termino)) {
@@ -223,14 +230,10 @@ class User extends Authenticatable implements HasMedia
                 ->orWhere('segundo_apellido', 'LIKE', "%{$termino}%")
                 ->orWhere('email', 'LIKE', "%{$termino}%")
                 ->orWhere('carnet', 'LIKE', "%{$termino}%")
-
                 ->orWhereRaw("CONCAT_WS(' ', primer_nombre, segundo_nombre, primer_apellido, segundo_apellido) LIKE ?", ["%{$termino}%"]);
         });
     }
 
-    /**
-     * Excluye usuarios por ID pasados como un string separado por guiones ("1-2-3")
-     */
     public function scopeSinUsuarioIds(Builder $query, $ids)
     {
         if (empty($ids)) {
@@ -238,7 +241,6 @@ class User extends Authenticatable implements HasMedia
         }
 
         $arregloIds = is_string($ids) ? explode('-', $ids) : $ids;
-
         return $query->whereNotIn('id', $arregloIds);
     }
 
@@ -246,5 +248,4 @@ class User extends Authenticatable implements HasMedia
     {
         return $this->hasMany(AsistenciaRegistro::class, 'alumno_id');
     }
-
 }

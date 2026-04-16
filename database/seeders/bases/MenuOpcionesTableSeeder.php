@@ -41,6 +41,13 @@ class MenuOpcionesTableSeeder extends Seeder
                 "subject" => "Espacio",
             ],
             [
+                "titulo" => "Certificar Fotos",
+                "icono" => "ri-camera-line",
+                "ruta" => "certificar-fotos",
+                "action" => "Listar Certificar Fotos",
+                "subject" => "Certificación",
+            ],
+            [
                 "titulo_seccion" => "Administración",
                 "action" => "Ver Modulo Usuarios",
                 "subject" => "User",

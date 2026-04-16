@@ -24,7 +24,7 @@ class TrabajoEspacioPermisosTableSeeder extends Seeder
         ];
 
         foreach ($permisos as $permiso) {
-            Permission::create([
+            Permission::firstOrCreate([
                 'name' => $permiso,
                 'subject' => 'TrabajoEspacio',
                 'guard_name' => 'web',

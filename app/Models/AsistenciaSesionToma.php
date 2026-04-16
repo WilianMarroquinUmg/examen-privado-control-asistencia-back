@@ -58,7 +58,7 @@ class AsistenciaSesionToma extends Model
     protected $fillable = [
         'hora_apertura',
         'hora_cierre',
-        'codito_otp',
+        'codigo_otp',
         'numero_toma',
         'sesion_id',
         'longitud_origen',

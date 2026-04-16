@@ -25,7 +25,7 @@ class AsistenciaConfiguracionPermisosTableSeeder extends Seeder
         ];
 
         foreach ($permisos as $permiso) {
-            Permission::create([
+            Permission::firstOrCreate([
                 'name' => $permiso,
                 'subject' => 'AsistenciaConfiguracion',
                 'guard_name' => 'web',

@@ -24,7 +24,7 @@ class FacultadPermisosTableSeeder extends Seeder
         ];
 
         foreach ($permisos as $permiso) {
-            Permission::create([
+            Permission::firstOrCreate([
                 'name' => $permiso,
                 'subject' => 'Facultad',
                 'guard_name' => 'web',

@@ -63,6 +63,7 @@ class RolesTableSeeder extends Seeder
             'Ver Asistencia Sesion Tomas',
             'Crear Asistencia Sesion Tomas',
             'Ver Asistencia Registros',
+            'Listar Certificar Fotos',
         ]);
 
 

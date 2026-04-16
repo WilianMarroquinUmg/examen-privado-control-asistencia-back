@@ -55,6 +55,7 @@ class UserApiController extends AppbaseController implements HasMiddleware
                 'email',
                 AllowedFilter::scope('busquedaAvanzada', 'busquedaAvanzada'),
                 AllowedFilter::scope('sinUsuarioIds', 'sinUsuarioIds'),
+                AllowedFilter::scope('soloPendientesDeCertificacion', 'soloPendientesDeCertificacion'),
             ])
             ->allowedSorts([
                 'id',
