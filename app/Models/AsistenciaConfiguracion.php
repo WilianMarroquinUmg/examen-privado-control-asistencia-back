@@ -9,7 +9,7 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 
 /**
- *
+ * 
  *
  * @property int $id
  * @property int $requiere_ubicacion
@@ -40,6 +40,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
  * @method static \Illuminate\Database\Eloquent\Builder<static>|AsistenciaConfiguracion whereUpdatedAt($value)
  * @method static \Illuminate\Database\Eloquent\Builder<static>|AsistenciaConfiguracion withTrashed()
  * @method static \Illuminate\Database\Eloquent\Builder<static>|AsistenciaConfiguracion withoutTrashed()
+ * @property-read TrabajoEspacio|null $espacio
  * @mixin \Eloquent
  */
 class AsistenciaConfiguracion extends Model

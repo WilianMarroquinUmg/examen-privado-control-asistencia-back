@@ -30,6 +30,8 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::post('/pdf', [ExportableDataTableApiController::class, 'exportarPdf']);
 
         Route::get('/publico/wordToPdf', [ExportableDataTableApiController::class, 'wordToPdf'])->withoutMiddleware('auth:sanctum');
+
+        Route::post('status-asistencia', [ExportableDataTableApiController::class, 'exportarStatusAsistencia']);
     });
 
     Route::post('facultad-asociar-ciclo', [FacultadApiController::class, 'asociarCiclo']);

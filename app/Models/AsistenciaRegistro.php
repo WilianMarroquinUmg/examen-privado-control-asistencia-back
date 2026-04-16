@@ -9,7 +9,7 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 
 /**
- *
+ * 
  *
  * @property int $id
  * @property string $hora_registro
@@ -43,6 +43,8 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
  * @method static \Illuminate\Database\Eloquent\Builder<static>|AsistenciaRegistro whereUpdatedAt($value)
  * @method static \Illuminate\Database\Eloquent\Builder<static>|AsistenciaRegistro withTrashed()
  * @method static \Illuminate\Database\Eloquent\Builder<static>|AsistenciaRegistro withoutTrashed()
+ * @property-read \App\Models\User $alumno
+ * @property-read \App\Models\AsistenciaSesionToma $toma
  * @mixin \Eloquent
  */
 class AsistenciaRegistro extends Model

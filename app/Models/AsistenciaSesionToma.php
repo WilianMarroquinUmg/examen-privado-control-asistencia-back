@@ -14,7 +14,7 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 
 /**
- *
+ * 
  *
  * @property int $id
  * @property \Illuminate\Support\Carbon $hora_apertura
@@ -44,6 +44,15 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
  * @method static \Illuminate\Database\Eloquent\Builder<static>|AsistenciaSesionToma whereUpdatedAt($value)
  * @method static \Illuminate\Database\Eloquent\Builder<static>|AsistenciaSesionToma withTrashed()
  * @method static \Illuminate\Database\Eloquent\Builder<static>|AsistenciaSesionToma withoutTrashed()
+ * @property string|null $codigo_otp
+ * @property int|null $radio_metros
+ * @property-read mixed $estado
+ * @property-read \Illuminate\Database\Eloquent\Collection<int, \App\Models\AsistenciaRegistro> $registros
+ * @property-read int|null $registros_count
+ * @property-read \App\Models\AsistenciaSesion $sesion
+ * @method static Builder<static>|AsistenciaSesionToma soloActivasParaAlumno($alumnoId)
+ * @method static Builder<static>|AsistenciaSesionToma whereCodigoOtp($value)
+ * @method static Builder<static>|AsistenciaSesionToma whereRadioMetros($value)
  * @mixin \Eloquent
  */
 class AsistenciaSesionToma extends Model

@@ -14,6 +14,8 @@ use Spatie\MediaLibrary\MediaCollections\Models\Media;
 use Spatie\Permission\Traits\HasRoles;
 
 /**
+ * 
+ *
  * @property int $id
  * @property string $primer_nombre
  * @property string|null $segundo_nombre
@@ -68,6 +70,10 @@ use Spatie\Permission\Traits\HasRoles;
  * @method static Builder<static>|User whereUsuario($value)
  * @method static Builder<static>|User withoutPermission($permissions)
  * @method static Builder<static>|User withoutRole($roles, $guard = null)
+ * @property-read \Illuminate\Database\Eloquent\Collection<int, \App\Models\AsistenciaRegistro> $asistenciaRegistros
+ * @property-read int|null $asistencia_registros_count
+ * @property-read string $nombre_corto
+ * @method static Builder<static>|User soloAlumnos()
  * @mixin \Eloquent
  */
 class User extends Authenticatable implements HasMedia
@@ -148,6 +154,14 @@ class User extends Authenticatable implements HasMedia
         return $this->hasRole('Super Admin');
     }
 
+    public function getNombreCortoAttribute(): string
+    {
+        $primerNombre = $this->primer_nombre ?? '';
+        $primerApellido = $this->primer_apellido ?? '';
+
+        return trim($primerNombre . ' ' . $primerApellido);
+    }
+
     public function getNombreCompletoAttribute()
     {
         return $this->primer_nombre . ' ' . $this->segundo_nombre . ' ' . $this->primer_apellido . ' ' . $this->segundo_apellido;
@@ -175,8 +189,8 @@ class User extends Authenticatable implements HasMedia
     {
         return $this->morphOne(Media::class, 'model')
             ->where('collection_name', 'foto_perfil_biometrico')
-            ->where('fue_certificada', false)
-            ->latestOfMany();
+            ->where('fue_certificada', 0)
+            ->latest('id');
     }
 
     /**

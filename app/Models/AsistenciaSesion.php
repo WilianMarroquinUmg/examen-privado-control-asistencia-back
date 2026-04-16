@@ -12,7 +12,7 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 
 /**
- *
+ * 
  *
  * @property int $id
  * @property \Illuminate\Support\Carbon $fecha
@@ -36,6 +36,10 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
  * @method static \Illuminate\Database\Eloquent\Builder<static>|AsistenciaSesion withoutTrashed()
  * @property int $configuracion_id
  * @method static \Illuminate\Database\Eloquent\Builder<static>|AsistenciaSesion whereConfiguracionId($value)
+ * @property-read \App\Models\AsistenciaConfiguracion $configuration
+ * @property-read TrabajoEspacio $espacio
+ * @property-read \Illuminate\Database\Eloquent\Collection<int, \App\Models\AsistenciaSesionToma> $tomas
+ * @property-read int|null $tomas_count
  * @mixin \Eloquent
  */
 class AsistenciaSesion extends Model
