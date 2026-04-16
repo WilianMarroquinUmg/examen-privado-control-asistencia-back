@@ -84,7 +84,14 @@ class RolesTableSeeder extends Seeder
     }
     public function todosLosPermisos(): array
     {
-        return Permission::all()->pluck('name')->toArray();
+        return Permission::whereNotIn('name', [
+            'Listar Crear Espacio',
+            'Listar Mis Espacios',
+            'Listar Certificar Fotos',
+            'Listar Ajustes Estudiante',
+            'Crear Trabajo Espacios',
+            'Ver Modulo Desarrollo',
+        ])->pluck('name')->toArray();
     }
 }
 
