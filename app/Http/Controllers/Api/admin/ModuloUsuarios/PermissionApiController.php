@@ -50,7 +50,7 @@ class PermissionApiController extends AppbaseController implements HasMiddleware
                 'subject',
             ])
             ->defaultSort('-id') // Ordenar por defecto por fecha descendente
-            ->paginate($request->get('per_page', 10));
+            ->jsonPaginate(request('page.size', 10));
 
         return $this->sendResponse($permissions->toArray(), 'permissions recuperados con éxito.');
     }

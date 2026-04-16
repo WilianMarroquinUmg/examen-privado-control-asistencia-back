@@ -64,7 +64,7 @@ class MenuOpcionApiController extends AppbaseController implements HasMiddleware
             ->Padres()
             ->with('children')
             ->orderBy('orden', 'asc')
-            ->paginate($request->get('per_page', 10));
+            ->jsonPaginate(request('page.size', 10));
 
         return $this->sendResponse($menuOpcions->toArray(), 'menu-opcions recuperados con éxito.');
     }

@@ -51,7 +51,7 @@ class RolApiController extends AppbaseController implements HasMiddleware
                 'name',
             ])
             ->defaultSort('-id') // Ordenar por defecto por fecha descendente
-            ->paginate($request->get('per_page', 10));
+            ->jsonPaginate(request('page.size', 10));
 
         return $this->sendResponse($roles->toArray(), 'roles recuperados con éxito.');
     }

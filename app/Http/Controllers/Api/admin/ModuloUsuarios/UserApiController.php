@@ -68,8 +68,7 @@ class UserApiController extends AppbaseController implements HasMiddleware
                 'usuario',
                 'email',
             ])
-            ->defaultSort('-id') // Ordenar por defecto por fecha descendente
-            ->paginate($request->get('per_page', 10));
+            ->jsonPaginate(request('page.size', 10));
 
         return $this->sendResponse($users->toArray(), 'users recuperados con éxito.');
     }

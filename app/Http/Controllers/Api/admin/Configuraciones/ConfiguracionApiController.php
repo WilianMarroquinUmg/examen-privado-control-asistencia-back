@@ -52,7 +52,7 @@ class ConfiguracionApiController extends AppbaseController implements HasMiddlew
                 'descripcion'
             ])
             ->defaultSort('-id') // Ordenar por defecto por fecha descendente
-            ->paginate($request->get('per_page', 10));
+            ->jsonPaginate(request('page.size', 10));
 
         return $this->sendResponse($configuraciones->toArray(), 'configuraciones recuperados con éxito.');
     }

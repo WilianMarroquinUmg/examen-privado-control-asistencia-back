@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\Api\ExportableDataTableApiController;
 use App\Http\Controllers\Api\Pensum\CicloApiController;
 use App\Http\Controllers\Api\Pensum\FacultadApiController;
 use App\Http\Controllers\Api\PerfilBiometricoApiController;
@@ -21,6 +22,14 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::get('/{id}', [PerfilBiometricoApiController::class, 'showInfoAlumno']);
         Route::post('/{id}/certificar', [PerfilBiometricoApiController::class, 'certificar']);
         Route::post('/{id}/rechazar', [PerfilBiometricoApiController::class, 'rechazar']);
+    });
+
+    Route::prefix('exportar')->group(function () {
+        Route::post('/excel', [ExportableDataTableApiController::class, 'exportarExcel']);
+
+        Route::post('/pdf', [ExportableDataTableApiController::class, 'exportarPdf']);
+
+        Route::get('/publico/wordToPdf', [ExportableDataTableApiController::class, 'wordToPdf'])->withoutMiddleware('auth:sanctum');
     });
 
     Route::post('facultad-asociar-ciclo', [FacultadApiController::class, 'asociarCiclo']);
