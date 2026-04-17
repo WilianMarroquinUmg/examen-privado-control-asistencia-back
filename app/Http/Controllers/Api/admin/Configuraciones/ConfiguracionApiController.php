@@ -166,7 +166,7 @@ class ConfiguracionApiController extends AppbaseController implements HasMiddlew
             // Es buena práctica loguear el error para debug
             \Log::error("Error al guardar configuraciones: " . $e->getMessage());
 
-            return $this->sendError('Error al guardar los cambios.', $e->getMessage(), 500);
+            return $this->sendError('Error al guardar la configuracion: ', $e->getMessage());
         }
     }
 

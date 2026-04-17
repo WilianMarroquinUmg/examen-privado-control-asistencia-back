@@ -278,7 +278,7 @@
                 "S3Bucket": {
                   "Ref": "ServerlessDeploymentBucket"
                 },
-                "S3Key": "serverless/asistencia-api/production/1776401814489-2026-04-17T04:56:54.489Z/asistencia-api.zip"
+                "S3Key": "serverless/asistencia-api/production/1776447253318-2026-04-17T17:34:13.318Z/asistencia-api.zip"
               },
               "Handler": "public/index.php",
               "Runtime": "provided.al2023",
@@ -336,7 +336,7 @@
                 "S3Bucket": {
                   "Ref": "ServerlessDeploymentBucket"
                 },
-                "S3Key": "serverless/asistencia-api/production/1776401814489-2026-04-17T04:56:54.489Z/asistencia-api.zip"
+                "S3Key": "serverless/asistencia-api/production/1776447253318-2026-04-17T17:34:13.318Z/asistencia-api.zip"
               },
               "Handler": "Bref\\LaravelBridge\\Queue\\QueueHandler",
               "Runtime": "provided.al2023",
@@ -386,25 +386,25 @@
               "JobsWorkerLogGroup"
             ]
           },
-          "ApiLambdaVersion3PxIjQvyWyhCaWTleOS6PObkyOFYbstqzybcC7KOGBs": {
+          "ApiLambdaVersionw0KsYwqtodPA4kkpTLOPpgf9dj6VmWSThmQRLlyOIE": {
             "Type": "AWS::Lambda::Version",
             "DeletionPolicy": "Retain",
             "Properties": {
               "FunctionName": {
                 "Ref": "ApiLambdaFunction"
               },
-              "CodeSha256": "QGJLHgaGlcHlYCag/MAsKQOfVg8xFrPf8TtIieNKCl4=",
+              "CodeSha256": "nbCUWXZrywAXcuTjsfA2PV6/HASecPta/cDWL5yqW/w=",
               "Description": "Laravel API Asistencia"
             }
           },
-          "JobsWorkerLambdaVersiontPzzgLAsm4E6DWTDQ7nHriLlCeBiY2r2IHbpormk": {
+          "JobsWorkerLambdaVersionIJkswO2H6l7xTpQDMS9UxNDnk5hCiHyRM1JRyLoYFM": {
             "Type": "AWS::Lambda::Version",
             "DeletionPolicy": "Retain",
             "Properties": {
               "FunctionName": {
                 "Ref": "JobsWorkerLambdaFunction"
               },
-              "CodeSha256": "QGJLHgaGlcHlYCag/MAsKQOfVg8xFrPf8TtIieNKCl4="
+              "CodeSha256": "nbCUWXZrywAXcuTjsfA2PV6/HASecPta/cDWL5yqW/w="
             }
           },
           "JobsWorkerEventSourceMappingSQSJobsQueueCEDBAE3E": {
@@ -571,7 +571,7 @@
           "ApiLambdaFunctionQualifiedArn": {
             "Description": "Current Lambda function version",
             "Value": {
-              "Ref": "ApiLambdaVersion3PxIjQvyWyhCaWTleOS6PObkyOFYbstqzybcC7KOGBs"
+              "Ref": "ApiLambdaVersionw0KsYwqtodPA4kkpTLOPpgf9dj6VmWSThmQRLlyOIE"
             },
             "Export": {
               "Name": "sls-asistencia-api-production-ApiLambdaFunctionQualifiedArn"
@@ -580,7 +580,7 @@
           "JobsWorkerLambdaFunctionQualifiedArn": {
             "Description": "Current Lambda function version",
             "Value": {
-              "Ref": "JobsWorkerLambdaVersiontPzzgLAsm4E6DWTDQ7nHriLlCeBiY2r2IHbpormk"
+              "Ref": "JobsWorkerLambdaVersionIJkswO2H6l7xTpQDMS9UxNDnk5hCiHyRM1JRyLoYFM"
             },
             "Export": {
               "Name": "sls-asistencia-api-production-JobsWorkerLambdaFunctionQualifiedArn"
@@ -767,7 +767,7 @@
         "package": {},
         "memory": 1024,
         "vpc": {},
-        "versionLogicalId": "ApiLambdaVersion3PxIjQvyWyhCaWTleOS6PObkyOFYbstqzybcC7KOGBs"
+        "versionLogicalId": "ApiLambdaVersionw0KsYwqtodPA4kkpTLOPpgf9dj6VmWSThmQRLlyOIE"
       },
       "jobsWorker": {
         "handler": "Bref\\LaravelBridge\\Queue\\QueueHandler",
@@ -795,7 +795,7 @@
         "package": {},
         "memory": 1024,
         "vpc": {},
-        "versionLogicalId": "JobsWorkerLambdaVersiontPzzgLAsm4E6DWTDQ7nHriLlCeBiY2r2IHbpormk"
+        "versionLogicalId": "JobsWorkerLambdaVersionIJkswO2H6l7xTpQDMS9UxNDnk5hCiHyRM1JRyLoYFM"
       }
     },
     "resources": {
@@ -902,7 +902,7 @@
                   "sqs:ChangeMessageVisibility"
                 ],
                 "Resource": [
-                  "${Token[TOKEN.21]}"
+                  "${Token[TOKEN.22]}"
                 ]
               }
             ]
@@ -923,7 +923,7 @@
           "AWS_BUCKET": "asistencia-media-storage-production",
           "AWS_USE_PATH_STYLE_ENDPOINT": "false",
           "QUEUE_CONNECTION": "sqs",
-          "SQS_QUEUE": "${Token[TOKEN.13]}",
+          "SQS_QUEUE": "${Token[TOKEN.14]}",
           "SQS_PREFIX": "",
           "SESSION_DRIVER": "cookie",
           "CACHE_DRIVER": "array",
@@ -982,7 +982,7 @@
           "events": [
             {
               "sqs": {
-                "arn": "${Token[TOKEN.21]}",
+                "arn": "${Token[TOKEN.22]}",
                 "batchSize": 1,
                 "maximumBatchingWindow": 0,
                 "functionResponseType": "ReportBatchItemFailures"
@@ -1032,10 +1032,10 @@
     },
     "layers": {},
     "isDashboardMonitoringPreconfigured": false,
-    "artifact": "/Users/wilianmarroquin/Proyectos/control-asistencia/.serverless/asistencia-api.zip"
+    "artifact": "C:\\laragon\\www\\control-asistencia-back\\.serverless\\asistencia-api.zip"
   },
   "package": {
-    "artifactDirectoryName": "serverless/asistencia-api/production/1776401814489-2026-04-17T04:56:54.489Z",
+    "artifactDirectoryName": "serverless/asistencia-api/production/1776447253318-2026-04-17T17:34:13.318Z",
     "artifact": "asistencia-api.zip"
   }
 }
