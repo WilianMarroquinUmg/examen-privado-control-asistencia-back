@@ -1,0 +1,111 @@
+service: asistencia-api
+
+provider:
+  name: aws
+  region: us-east-1
+  stage: production
+  memorySize: 1024
+
+  # 🚀 Permisos nativos para que Laravel hable con Rekognition y S3
+  iam:
+    role:
+      statements:
+        - Effect: Allow
+          Action:
+            - rekognition:CreateFaceLivenessSession
+            - rekognition:GetFaceLivenessSessionResults
+            - rekognition:CompareFaces
+          Resource: '*'
+        - Effect: Allow
+          Action:
+            - s3:PutObject
+            - s3:GetObject
+            - s3:DeleteObject
+          Resource:
+            - !Sub 'arn:aws:s3:::${self:custom.bucketName}'
+            - !Sub 'arn:aws:s3:::${self:custom.bucketName}/*'
+
+  # 🚀 CORRECCIÓN 1: environment vuelve a su hogar dentro de provider
+  environment:
+    APP_URL: https://api.asistencia.mrqn-labs.com
+    APP_ENV: production
+    APP_DEBUG: false
+    APP_KEY: ${ssm:/asistencia/APP_KEY}
+
+    # Base de datos
+    DB_CONNECTION: mysql
+    DB_HOST: ${ssm:/asistencia/DB_HOST}
+    DB_PORT: 3306
+    DB_DATABASE: ${ssm:/asistencia/DB_DATABASE}
+    DB_USERNAME: ${ssm:/asistencia/DB_USERNAME}
+    DB_PASSWORD: ${ssm:/asistencia/DB_PASSWORD}
+
+    # Almacenamiento (Spatie Media Library DEBE usar s3)
+    FILESYSTEM_DISK: s3
+    AWS_BUCKET: ${self:custom.bucketName}
+    AWS_USE_PATH_STYLE_ENDPOINT: false
+
+    # Queue (Serverless Lift)
+    QUEUE_CONNECTION: sqs
+    SQS_QUEUE: ${construct:jobs.queueUrl}
+    SQS_PREFIX: ''
+
+    # Sanctum y CORS
+    SESSION_DRIVER: cookie
+    CACHE_DRIVER: array
+    SESSION_DOMAIN: .asistencia.mrqn-labs.com
+    FRONTEND_URL: https://asistencia.mrqn-labs.com
+    SANCTUM_STATEFUL_DOMAINS: asistencia.mrqn-labs.com,api.asistencia.mrqn-labs.com
+
+    # Certificado DB
+    MYSQL_ATTR_SSL_CA: /etc/pki/tls/certs/ca-bundle.crt
+
+plugins:
+  - ./vendor/bref/bref
+  - serverless-domain-manager
+  - serverless-lift
+
+custom:
+  bucketName: asistencia-media-storage-${self:provider.stage}
+  customDomain:
+    domainName: api.asistencia.mrqn-labs.com
+    basePath: ''
+    stage: ${self:provider.stage}
+    createRoute53Record: true
+    apiType: http
+    endpointType: regional
+    certificateArn: arn:aws:acm:us-east-1:905418356464:certificate/f5b16420-08e0-4dbe-8d6a-edfc924bc943
+
+functions:
+  api:
+    handler: public/index.php
+    runtime: php-82-fpm
+    description: 'Laravel API Asistencia'
+    timeout: 28
+    events:
+      - httpApi: '*'
+
+constructs:
+  jobs:
+    type: queue
+    worker:
+      handler: Bref\LaravelBridge\Queue\QueueHandler
+      runtime: php-82
+      timeout: 60
+
+package:
+  exclude:
+    - node_modules/**
+    - public/storage
+    - resources/assets/**
+    - storage/**
+    - tests/**
+    - .env
+
+# 🚀 CORRECCIÓN 2: resources se va hasta el puro final del archivo, alineado a la izquierda
+resources:
+  Resources:
+    MediaStorageBucket:
+      Type: AWS::S3::Bucket
+      Properties:
+        BucketName: ${self:custom.bucketName}

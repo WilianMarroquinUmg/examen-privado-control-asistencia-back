@@ -1,0 +1,1041 @@
+{
+  "service": {
+    "service": "asistencia-api",
+    "serviceObject": {
+      "name": "asistencia-api"
+    },
+    "provider": {
+      "name": "aws",
+      "region": "us-east-1",
+      "stage": "production",
+      "memorySize": 1024,
+      "iam": {
+        "role": {
+          "statements": [
+            {
+              "Effect": "Allow",
+              "Action": [
+                "rekognition:CreateFaceLivenessSession",
+                "rekognition:GetFaceLivenessSessionResults",
+                "rekognition:CompareFaces"
+              ],
+              "Resource": "*"
+            },
+            {
+              "Effect": "Allow",
+              "Action": [
+                "s3:PutObject",
+                "s3:GetObject",
+                "s3:DeleteObject"
+              ],
+              "Resource": [
+                {
+                  "Fn::Sub": "arn:aws:s3:::asistencia-media-storage-production"
+                },
+                {
+                  "Fn::Sub": "arn:aws:s3:::asistencia-media-storage-production/*"
+                }
+              ]
+            },
+            {
+              "Effect": "Allow",
+              "Action": [
+                "sqs:SendMessage",
+                "sqs:ChangeMessageVisibility"
+              ],
+              "Resource": [
+                {
+                  "Fn::GetAtt": [
+                    "jobsQueueCEDBAE3E",
+                    "Arn"
+                  ]
+                }
+              ]
+            }
+          ]
+        }
+      },
+      "environment": {
+        "APP_URL": "https://api.asistencia.mrqn-labs.com",
+        "APP_ENV": "production",
+        "APP_DEBUG": "false",
+        "APP_KEY": "base64:y7Ja4THYKMHJKSxrQbxtWmFeLvZNlEzaHFKXbl1ZJV8=",
+        "DB_CONNECTION": "mysql",
+        "DB_HOST": "gateway01.us-east-1.prod.aws.tidbcloud.com",
+        "DB_PORT": "3306",
+        "DB_DATABASE": "asistencia",
+        "DB_USERNAME": "39BaeVvH61SYpuH.root",
+        "DB_PASSWORD": "jP0X0AqnpbT1fihI",
+        "FILESYSTEM_DISK": "s3",
+        "AWS_BUCKET": "asistencia-media-storage-production",
+        "AWS_USE_PATH_STYLE_ENDPOINT": "false",
+        "QUEUE_CONNECTION": "sqs",
+        "SQS_QUEUE": {
+          "Ref": "jobsQueueCEDBAE3E"
+        },
+        "SQS_PREFIX": "",
+        "SESSION_DRIVER": "cookie",
+        "CACHE_DRIVER": "array",
+        "SESSION_DOMAIN": ".asistencia.mrqn-labs.com",
+        "FRONTEND_URL": "https://asistencia.mrqn-labs.com",
+        "SANCTUM_STATEFUL_DOMAINS": "asistencia.mrqn-labs.com,api.asistencia.mrqn-labs.com",
+        "MYSQL_ATTR_SSL_CA": "/etc/pki/tls/certs/ca-bundle.crt"
+      },
+      "versionFunctions": true,
+      "deploymentMethod": "direct",
+      "compiledCloudFormationTemplate": {
+        "AWSTemplateFormatVersion": "2010-09-09",
+        "Description": "The AWS CloudFormation template for this Serverless application",
+        "Resources": {
+          "ServerlessDeploymentBucket": {
+            "Type": "AWS::S3::Bucket",
+            "Properties": {
+              "BucketEncryption": {
+                "ServerSideEncryptionConfiguration": [
+                  {
+                    "ServerSideEncryptionByDefault": {
+                      "SSEAlgorithm": "AES256"
+                    }
+                  }
+                ]
+              }
+            }
+          },
+          "ServerlessDeploymentBucketPolicy": {
+            "Type": "AWS::S3::BucketPolicy",
+            "Properties": {
+              "Bucket": {
+                "Ref": "ServerlessDeploymentBucket"
+              },
+              "PolicyDocument": {
+                "Statement": [
+                  {
+                    "Action": "s3:*",
+                    "Effect": "Deny",
+                    "Principal": "*",
+                    "Resource": [
+                      {
+                        "Fn::Join": [
+                          "",
+                          [
+                            "arn:",
+                            {
+                              "Ref": "AWS::Partition"
+                            },
+                            ":s3:::",
+                            {
+                              "Ref": "ServerlessDeploymentBucket"
+                            },
+                            "/*"
+                          ]
+                        ]
+                      },
+                      {
+                        "Fn::Join": [
+                          "",
+                          [
+                            "arn:",
+                            {
+                              "Ref": "AWS::Partition"
+                            },
+                            ":s3:::",
+                            {
+                              "Ref": "ServerlessDeploymentBucket"
+                            }
+                          ]
+                        ]
+                      }
+                    ],
+                    "Condition": {
+                      "Bool": {
+                        "aws:SecureTransport": false
+                      }
+                    }
+                  }
+                ]
+              }
+            }
+          },
+          "ApiLogGroup": {
+            "Type": "AWS::Logs::LogGroup",
+            "Properties": {
+              "LogGroupName": "/aws/lambda/asistencia-api-production-api"
+            }
+          },
+          "JobsWorkerLogGroup": {
+            "Type": "AWS::Logs::LogGroup",
+            "Properties": {
+              "LogGroupName": "/aws/lambda/asistencia-api-production-jobsWorker"
+            }
+          },
+          "IamRoleLambdaExecution": {
+            "Type": "AWS::IAM::Role",
+            "Properties": {
+              "AssumeRolePolicyDocument": {
+                "Version": "2012-10-17",
+                "Statement": [
+                  {
+                    "Effect": "Allow",
+                    "Principal": {
+                      "Service": [
+                        "lambda.amazonaws.com"
+                      ]
+                    },
+                    "Action": [
+                      "sts:AssumeRole"
+                    ]
+                  }
+                ]
+              },
+              "Policies": [
+                {
+                  "PolicyName": {
+                    "Fn::Join": [
+                      "-",
+                      [
+                        "asistencia-api",
+                        "production",
+                        "lambda"
+                      ]
+                    ]
+                  },
+                  "PolicyDocument": {
+                    "Version": "2012-10-17",
+                    "Statement": [
+                      {
+                        "Effect": "Allow",
+                        "Action": [
+                          "logs:CreateLogStream",
+                          "logs:CreateLogGroup",
+                          "logs:TagResource"
+                        ],
+                        "Resource": [
+                          {
+                            "Fn::Sub": "arn:${AWS::Partition}:logs:${AWS::Region}:${AWS::AccountId}:log-group:/aws/lambda/asistencia-api-production*:*"
+                          }
+                        ]
+                      },
+                      {
+                        "Effect": "Allow",
+                        "Action": [
+                          "logs:PutLogEvents"
+                        ],
+                        "Resource": [
+                          {
+                            "Fn::Sub": "arn:${AWS::Partition}:logs:${AWS::Region}:${AWS::AccountId}:log-group:/aws/lambda/asistencia-api-production*:*:*"
+                          }
+                        ]
+                      },
+                      {
+                        "$ref": "$[\"service\"][\"provider\"][\"iam\"][\"role\"][\"statements\"][0]"
+                      },
+                      {
+                        "$ref": "$[\"service\"][\"provider\"][\"iam\"][\"role\"][\"statements\"][1]"
+                      },
+                      {
+                        "$ref": "$[\"service\"][\"provider\"][\"iam\"][\"role\"][\"statements\"][2]"
+                      },
+                      {
+                        "Effect": "Allow",
+                        "Action": [
+                          "sqs:ReceiveMessage",
+                          "sqs:DeleteMessage",
+                          "sqs:GetQueueAttributes"
+                        ],
+                        "Resource": [
+                          {
+                            "Fn::GetAtt": [
+                              "jobsQueueCEDBAE3E",
+                              "Arn"
+                            ]
+                          }
+                        ]
+                      }
+                    ]
+                  }
+                }
+              ],
+              "Path": "/",
+              "RoleName": {
+                "Fn::Join": [
+                  "-",
+                  [
+                    "asistencia-api",
+                    "production",
+                    {
+                      "Ref": "AWS::Region"
+                    },
+                    "lambdaRole"
+                  ]
+                ]
+              }
+            }
+          },
+          "ApiLambdaFunction": {
+            "Type": "AWS::Lambda::Function",
+            "Properties": {
+              "Code": {
+                "S3Bucket": {
+                  "Ref": "ServerlessDeploymentBucket"
+                },
+                "S3Key": "serverless/asistencia-api/production/1776394256530-2026-04-17T02:50:56.530Z/asistencia-api.zip"
+              },
+              "Handler": "public/index.php",
+              "Runtime": "provided.al2023",
+              "FunctionName": "asistencia-api-production-api",
+              "MemorySize": 1024,
+              "Timeout": 28,
+              "Description": "Laravel API Asistencia",
+              "Environment": {
+                "Variables": {
+                  "APP_URL": "https://api.asistencia.mrqn-labs.com",
+                  "APP_ENV": "production",
+                  "APP_DEBUG": "false",
+                  "APP_KEY": "base64:y7Ja4THYKMHJKSxrQbxtWmFeLvZNlEzaHFKXbl1ZJV8=",
+                  "DB_CONNECTION": "mysql",
+                  "DB_HOST": "gateway01.us-east-1.prod.aws.tidbcloud.com",
+                  "DB_PORT": "3306",
+                  "DB_DATABASE": "asistencia",
+                  "DB_USERNAME": "39BaeVvH61SYpuH.root",
+                  "DB_PASSWORD": "jP0X0AqnpbT1fihI",
+                  "FILESYSTEM_DISK": "s3",
+                  "AWS_BUCKET": "asistencia-media-storage-production",
+                  "AWS_USE_PATH_STYLE_ENDPOINT": "false",
+                  "QUEUE_CONNECTION": "sqs",
+                  "SQS_QUEUE": {
+                    "$ref": "$[\"service\"][\"provider\"][\"environment\"][\"SQS_QUEUE\"]"
+                  },
+                  "SQS_PREFIX": "",
+                  "SESSION_DRIVER": "cookie",
+                  "CACHE_DRIVER": "array",
+                  "SESSION_DOMAIN": ".asistencia.mrqn-labs.com",
+                  "FRONTEND_URL": "https://asistencia.mrqn-labs.com",
+                  "SANCTUM_STATEFUL_DOMAINS": "asistencia.mrqn-labs.com,api.asistencia.mrqn-labs.com",
+                  "MYSQL_ATTR_SSL_CA": "/etc/pki/tls/certs/ca-bundle.crt",
+                  "BREF_RUNTIME": "Bref\\FpmRuntime\\Main"
+                }
+              },
+              "Role": {
+                "Fn::GetAtt": [
+                  "IamRoleLambdaExecution",
+                  "Arn"
+                ]
+              },
+              "Layers": [
+                "arn:aws:lambda:us-east-1:873528684822:layer:php-82:18"
+              ]
+            },
+            "DependsOn": [
+              "ApiLogGroup"
+            ]
+          },
+          "JobsWorkerLambdaFunction": {
+            "Type": "AWS::Lambda::Function",
+            "Properties": {
+              "Code": {
+                "S3Bucket": {
+                  "Ref": "ServerlessDeploymentBucket"
+                },
+                "S3Key": "serverless/asistencia-api/production/1776394256530-2026-04-17T02:50:56.530Z/asistencia-api.zip"
+              },
+              "Handler": "Bref\\LaravelBridge\\Queue\\QueueHandler",
+              "Runtime": "provided.al2023",
+              "FunctionName": "asistencia-api-production-jobsWorker",
+              "MemorySize": 1024,
+              "Timeout": 60,
+              "Environment": {
+                "Variables": {
+                  "APP_URL": "https://api.asistencia.mrqn-labs.com",
+                  "APP_ENV": "production",
+                  "APP_DEBUG": "false",
+                  "APP_KEY": "base64:y7Ja4THYKMHJKSxrQbxtWmFeLvZNlEzaHFKXbl1ZJV8=",
+                  "DB_CONNECTION": "mysql",
+                  "DB_HOST": "gateway01.us-east-1.prod.aws.tidbcloud.com",
+                  "DB_PORT": "3306",
+                  "DB_DATABASE": "asistencia",
+                  "DB_USERNAME": "39BaeVvH61SYpuH.root",
+                  "DB_PASSWORD": "jP0X0AqnpbT1fihI",
+                  "FILESYSTEM_DISK": "s3",
+                  "AWS_BUCKET": "asistencia-media-storage-production",
+                  "AWS_USE_PATH_STYLE_ENDPOINT": "false",
+                  "QUEUE_CONNECTION": "sqs",
+                  "SQS_QUEUE": {
+                    "$ref": "$[\"service\"][\"provider\"][\"environment\"][\"SQS_QUEUE\"]"
+                  },
+                  "SQS_PREFIX": "",
+                  "SESSION_DRIVER": "cookie",
+                  "CACHE_DRIVER": "array",
+                  "SESSION_DOMAIN": ".asistencia.mrqn-labs.com",
+                  "FRONTEND_URL": "https://asistencia.mrqn-labs.com",
+                  "SANCTUM_STATEFUL_DOMAINS": "asistencia.mrqn-labs.com,api.asistencia.mrqn-labs.com",
+                  "MYSQL_ATTR_SSL_CA": "/etc/pki/tls/certs/ca-bundle.crt",
+                  "BREF_RUNTIME": "Bref\\FunctionRuntime\\Main"
+                }
+              },
+              "Role": {
+                "Fn::GetAtt": [
+                  "IamRoleLambdaExecution",
+                  "Arn"
+                ]
+              },
+              "Layers": [
+                "arn:aws:lambda:us-east-1:873528684822:layer:php-82:18"
+              ]
+            },
+            "DependsOn": [
+              "JobsWorkerLogGroup"
+            ]
+          },
+          "ApiLambdaVersionFkXKgNAz9uzDlmWjeEgHB07OPoLC1AKtyXRAUIOE": {
+            "Type": "AWS::Lambda::Version",
+            "DeletionPolicy": "Retain",
+            "Properties": {
+              "FunctionName": {
+                "Ref": "ApiLambdaFunction"
+              },
+              "CodeSha256": "w075jHKQDXNdEaQHI5MHma2zXd0MrHVHyyRaHZmbn1M=",
+              "Description": "Laravel API Asistencia"
+            }
+          },
+          "JobsWorkerLambdaVersion6cESQQIxjVyBSxncZX2ouEmnx5u2srR5v1XkmFHHQo": {
+            "Type": "AWS::Lambda::Version",
+            "DeletionPolicy": "Retain",
+            "Properties": {
+              "FunctionName": {
+                "Ref": "JobsWorkerLambdaFunction"
+              },
+              "CodeSha256": "w075jHKQDXNdEaQHI5MHma2zXd0MrHVHyyRaHZmbn1M="
+            }
+          },
+          "JobsWorkerEventSourceMappingSQSJobsQueueCEDBAE3E": {
+            "Type": "AWS::Lambda::EventSourceMapping",
+            "DependsOn": [
+              "IamRoleLambdaExecution"
+            ],
+            "Properties": {
+              "BatchSize": 1,
+              "MaximumBatchingWindowInSeconds": 0,
+              "EventSourceArn": {
+                "Fn::GetAtt": [
+                  "jobsQueueCEDBAE3E",
+                  "Arn"
+                ]
+              },
+              "FunctionName": {
+                "Fn::GetAtt": [
+                  "JobsWorkerLambdaFunction",
+                  "Arn"
+                ]
+              },
+              "Enabled": true,
+              "FunctionResponseTypes": [
+                "ReportBatchItemFailures"
+              ]
+            }
+          },
+          "HttpApi": {
+            "Type": "AWS::ApiGatewayV2::Api",
+            "Properties": {
+              "Name": "production-asistencia-api",
+              "ProtocolType": "HTTP"
+            }
+          },
+          "HttpApiStage": {
+            "Type": "AWS::ApiGatewayV2::Stage",
+            "Properties": {
+              "ApiId": {
+                "Ref": "HttpApi"
+              },
+              "StageName": "$default",
+              "AutoDeploy": true,
+              "DefaultRouteSettings": {
+                "DetailedMetricsEnabled": false
+              }
+            }
+          },
+          "ApiLambdaPermissionHttpApi": {
+            "Type": "AWS::Lambda::Permission",
+            "Properties": {
+              "FunctionName": {
+                "Fn::GetAtt": [
+                  "ApiLambdaFunction",
+                  "Arn"
+                ]
+              },
+              "Action": "lambda:InvokeFunction",
+              "Principal": "apigateway.amazonaws.com",
+              "SourceArn": {
+                "Fn::Join": [
+                  "",
+                  [
+                    "arn:",
+                    {
+                      "Ref": "AWS::Partition"
+                    },
+                    ":execute-api:",
+                    {
+                      "Ref": "AWS::Region"
+                    },
+                    ":",
+                    {
+                      "Ref": "AWS::AccountId"
+                    },
+                    ":",
+                    {
+                      "Ref": "HttpApi"
+                    },
+                    "/*"
+                  ]
+                ]
+              }
+            }
+          },
+          "HttpApiIntegrationApi": {
+            "Type": "AWS::ApiGatewayV2::Integration",
+            "Properties": {
+              "ApiId": {
+                "Ref": "HttpApi"
+              },
+              "IntegrationType": "AWS_PROXY",
+              "IntegrationUri": {
+                "$ref": "$[\"service\"][\"provider\"][\"compiledCloudFormationTemplate\"][\"Resources\"][\"ApiLambdaPermissionHttpApi\"][\"Properties\"][\"FunctionName\"]"
+              },
+              "PayloadFormatVersion": "2.0",
+              "TimeoutInMillis": 30000
+            }
+          },
+          "HttpApiRouteDefault": {
+            "Type": "AWS::ApiGatewayV2::Route",
+            "Properties": {
+              "ApiId": {
+                "Ref": "HttpApi"
+              },
+              "RouteKey": "$default",
+              "Target": {
+                "Fn::Join": [
+                  "/",
+                  [
+                    "integrations",
+                    {
+                      "Ref": "HttpApiIntegrationApi"
+                    }
+                  ]
+                ]
+              }
+            },
+            "DependsOn": "HttpApiIntegrationApi"
+          },
+          "MediaStorageBucket": {
+            "Type": "AWS::S3::Bucket",
+            "Properties": {
+              "BucketName": "asistencia-media-storage-production"
+            }
+          },
+          "jobsDlqD18CF374": {
+            "Type": "AWS::SQS::Queue",
+            "Properties": {
+              "MessageRetentionPeriod": 1209600,
+              "QueueName": "asistencia-api-production-jobs-dlq"
+            },
+            "UpdateReplacePolicy": "Delete",
+            "DeletionPolicy": "Delete"
+          },
+          "jobsQueueCEDBAE3E": {
+            "Type": "AWS::SQS::Queue",
+            "Properties": {
+              "QueueName": "asistencia-api-production-jobs",
+              "RedrivePolicy": {
+                "deadLetterTargetArn": {
+                  "Fn::GetAtt": [
+                    "jobsDlqD18CF374",
+                    "Arn"
+                  ]
+                },
+                "maxReceiveCount": 3
+              },
+              "VisibilityTimeout": 360
+            },
+            "UpdateReplacePolicy": "Delete",
+            "DeletionPolicy": "Delete"
+          }
+        },
+        "Outputs": {
+          "ServerlessDeploymentBucketName": {
+            "Value": {
+              "Ref": "ServerlessDeploymentBucket"
+            },
+            "Export": {
+              "Name": "sls-asistencia-api-production-ServerlessDeploymentBucketName"
+            }
+          },
+          "ApiLambdaFunctionQualifiedArn": {
+            "Description": "Current Lambda function version",
+            "Value": {
+              "Ref": "ApiLambdaVersionFkXKgNAz9uzDlmWjeEgHB07OPoLC1AKtyXRAUIOE"
+            },
+            "Export": {
+              "Name": "sls-asistencia-api-production-ApiLambdaFunctionQualifiedArn"
+            }
+          },
+          "JobsWorkerLambdaFunctionQualifiedArn": {
+            "Description": "Current Lambda function version",
+            "Value": {
+              "Ref": "JobsWorkerLambdaVersion6cESQQIxjVyBSxncZX2ouEmnx5u2srR5v1XkmFHHQo"
+            },
+            "Export": {
+              "Name": "sls-asistencia-api-production-JobsWorkerLambdaFunctionQualifiedArn"
+            }
+          },
+          "HttpApiId": {
+            "Description": "Id of the HTTP API",
+            "Value": {
+              "Ref": "HttpApi"
+            },
+            "Export": {
+              "Name": "sls-asistencia-api-production-HttpApiId"
+            }
+          },
+          "HttpApiUrl": {
+            "Description": "URL of the HTTP API",
+            "Value": {
+              "Fn::Join": [
+                "",
+                [
+                  "https://",
+                  {
+                    "Ref": "HttpApi"
+                  },
+                  ".execute-api.",
+                  {
+                    "Ref": "AWS::Region"
+                  },
+                  ".",
+                  {
+                    "Ref": "AWS::URLSuffix"
+                  }
+                ]
+              ]
+            },
+            "Export": {
+              "Name": "sls-asistencia-api-production-HttpApiUrl"
+            }
+          },
+          "jobsQueueArnA5A2FF7E": {
+            "Description": "ARN of the \"jobs\" SQS queue.",
+            "Value": {
+              "Fn::GetAtt": [
+                "jobsQueueCEDBAE3E",
+                "Arn"
+              ]
+            }
+          },
+          "jobsQueueUrl573F5B7A": {
+            "Description": "URL of the \"jobs\" SQS queue.",
+            "Value": {
+              "Ref": "jobsQueueCEDBAE3E"
+            }
+          },
+          "jobsDlqUrl2C7FA9D4": {
+            "Description": "URL of the \"jobs\" SQS dead letter queue.",
+            "Value": {
+              "Ref": "jobsDlqD18CF374"
+            }
+          }
+        }
+      },
+      "coreCloudFormationTemplate": {
+        "AWSTemplateFormatVersion": "2010-09-09",
+        "Description": "The AWS CloudFormation template for this Serverless application",
+        "Resources": {
+          "ServerlessDeploymentBucket": {
+            "Type": "AWS::S3::Bucket",
+            "Properties": {
+              "BucketEncryption": {
+                "ServerSideEncryptionConfiguration": [
+                  {
+                    "ServerSideEncryptionByDefault": {
+                      "SSEAlgorithm": "AES256"
+                    }
+                  }
+                ]
+              }
+            }
+          },
+          "ServerlessDeploymentBucketPolicy": {
+            "Type": "AWS::S3::BucketPolicy",
+            "Properties": {
+              "Bucket": {
+                "Ref": "ServerlessDeploymentBucket"
+              },
+              "PolicyDocument": {
+                "Statement": [
+                  {
+                    "Action": "s3:*",
+                    "Effect": "Deny",
+                    "Principal": "*",
+                    "Resource": [
+                      {
+                        "Fn::Join": [
+                          "",
+                          [
+                            "arn:",
+                            {
+                              "Ref": "AWS::Partition"
+                            },
+                            ":s3:::",
+                            {
+                              "Ref": "ServerlessDeploymentBucket"
+                            },
+                            "/*"
+                          ]
+                        ]
+                      },
+                      {
+                        "Fn::Join": [
+                          "",
+                          [
+                            "arn:",
+                            {
+                              "Ref": "AWS::Partition"
+                            },
+                            ":s3:::",
+                            {
+                              "Ref": "ServerlessDeploymentBucket"
+                            }
+                          ]
+                        ]
+                      }
+                    ],
+                    "Condition": {
+                      "Bool": {
+                        "aws:SecureTransport": false
+                      }
+                    }
+                  }
+                ]
+              }
+            }
+          }
+        },
+        "Outputs": {
+          "ServerlessDeploymentBucketName": {
+            "Value": {
+              "Ref": "ServerlessDeploymentBucket"
+            }
+          }
+        }
+      },
+      "vpc": {}
+    },
+    "custom": {
+      "bucketName": "asistencia-media-storage-production",
+      "customDomain": {
+        "domainName": "api.asistencia.mrqn-labs.com",
+        "basePath": "",
+        "stage": "production",
+        "createRoute53Record": true,
+        "apiType": "http",
+        "endpointType": "regional",
+        "certificateArn": "arn:aws:acm:us-east-1:905418356464:certificate/f5b16420-08e0-4dbe-8d6a-edfc924bc943"
+      }
+    },
+    "plugins": [
+      "./vendor/bref/bref",
+      "serverless-domain-manager",
+      "serverless-lift"
+    ],
+    "pluginsData": {},
+    "functions": {
+      "api": {
+        "handler": "public/index.php",
+        "runtime": "provided.al2023",
+        "description": "Laravel API Asistencia",
+        "timeout": 28,
+        "events": [
+          {
+            "httpApi": "*",
+            "resolvedMethod": "ANY"
+          }
+        ],
+        "name": "asistencia-api-production-api",
+        "layers": {
+          "$ref": "$[\"service\"][\"provider\"][\"compiledCloudFormationTemplate\"][\"Resources\"][\"ApiLambdaFunction\"][\"Properties\"][\"Layers\"]"
+        },
+        "environment": {
+          "BREF_RUNTIME": "Bref\\FpmRuntime\\Main"
+        },
+        "package": {},
+        "memory": 1024,
+        "vpc": {},
+        "versionLogicalId": "ApiLambdaVersionFkXKgNAz9uzDlmWjeEgHB07OPoLC1AKtyXRAUIOE"
+      },
+      "jobsWorker": {
+        "handler": "Bref\\LaravelBridge\\Queue\\QueueHandler",
+        "runtime": "provided.al2023",
+        "timeout": 60,
+        "layers": {
+          "$ref": "$[\"service\"][\"provider\"][\"compiledCloudFormationTemplate\"][\"Resources\"][\"JobsWorkerLambdaFunction\"][\"Properties\"][\"Layers\"]"
+        },
+        "environment": {
+          "BREF_RUNTIME": "Bref\\FunctionRuntime\\Main"
+        },
+        "events": [
+          {
+            "sqs": {
+              "arn": {
+                "$ref": "$[\"service\"][\"provider\"][\"compiledCloudFormationTemplate\"][\"Resources\"][\"IamRoleLambdaExecution\"][\"Properties\"][\"Policies\"][0][\"PolicyDocument\"][\"Statement\"][5][\"Resource\"][0]"
+              },
+              "batchSize": 1,
+              "maximumBatchingWindow": 0,
+              "functionResponseType": "ReportBatchItemFailures"
+            }
+          }
+        ],
+        "name": "asistencia-api-production-jobsWorker",
+        "package": {},
+        "memory": 1024,
+        "vpc": {},
+        "versionLogicalId": "JobsWorkerLambdaVersion6cESQQIxjVyBSxncZX2ouEmnx5u2srR5v1XkmFHHQo"
+      }
+    },
+    "resources": {
+      "Resources": {
+        "MediaStorageBucket": {
+          "Type": "AWS::S3::Bucket",
+          "Properties": {
+            "BucketName": "asistencia-media-storage-production"
+          }
+        },
+        "jobsDlqD18CF374": {
+          "Type": "AWS::SQS::Queue",
+          "Properties": {
+            "MessageRetentionPeriod": 1209600,
+            "QueueName": "asistencia-api-production-jobs-dlq"
+          },
+          "UpdateReplacePolicy": "Delete",
+          "DeletionPolicy": "Delete"
+        },
+        "jobsQueueCEDBAE3E": {
+          "Type": "AWS::SQS::Queue",
+          "Properties": {
+            "QueueName": "asistencia-api-production-jobs",
+            "RedrivePolicy": {
+              "deadLetterTargetArn": {
+                "Fn::GetAtt": [
+                  "jobsDlqD18CF374",
+                  "Arn"
+                ]
+              },
+              "maxReceiveCount": 3
+            },
+            "VisibilityTimeout": 360
+          },
+          "UpdateReplacePolicy": "Delete",
+          "DeletionPolicy": "Delete"
+        }
+      },
+      "Outputs": {
+        "jobsQueueArnA5A2FF7E": {
+          "Description": "ARN of the \"jobs\" SQS queue.",
+          "Value": {
+            "Fn::GetAtt": [
+              "jobsQueueCEDBAE3E",
+              "Arn"
+            ]
+          }
+        },
+        "jobsQueueUrl573F5B7A": {
+          "Description": "URL of the \"jobs\" SQS queue.",
+          "Value": {
+            "Ref": "jobsQueueCEDBAE3E"
+          }
+        },
+        "jobsDlqUrl2C7FA9D4": {
+          "Description": "URL of the \"jobs\" SQS dead letter queue.",
+          "Value": {
+            "Ref": "jobsDlqD18CF374"
+          }
+        }
+      }
+    },
+    "configValidationMode": "warn",
+    "serviceFilename": "serverless.yaml",
+    "initialServerlessConfig": {
+      "service": "asistencia-api",
+      "provider": {
+        "name": "aws",
+        "region": "us-east-1",
+        "stage": "production",
+        "memorySize": 1024,
+        "iam": {
+          "role": {
+            "statements": [
+              {
+                "Effect": "Allow",
+                "Action": [
+                  "rekognition:CreateFaceLivenessSession",
+                  "rekognition:GetFaceLivenessSessionResults",
+                  "rekognition:CompareFaces"
+                ],
+                "Resource": "*"
+              },
+              {
+                "Effect": "Allow",
+                "Action": [
+                  "s3:PutObject",
+                  "s3:GetObject",
+                  "s3:DeleteObject"
+                ],
+                "Resource": [
+                  {
+                    "Fn::Sub": "arn:aws:s3:::asistencia-media-storage-production"
+                  },
+                  {
+                    "Fn::Sub": "arn:aws:s3:::asistencia-media-storage-production/*"
+                  }
+                ]
+              },
+              {
+                "Effect": "Allow",
+                "Action": [
+                  "sqs:SendMessage",
+                  "sqs:ChangeMessageVisibility"
+                ],
+                "Resource": [
+                  "${Token[TOKEN.16]}"
+                ]
+              }
+            ]
+          }
+        },
+        "environment": {
+          "APP_URL": "https://api.asistencia.mrqn-labs.com",
+          "APP_ENV": "production",
+          "APP_DEBUG": "false",
+          "APP_KEY": "base64:y7Ja4THYKMHJKSxrQbxtWmFeLvZNlEzaHFKXbl1ZJV8=",
+          "DB_CONNECTION": "mysql",
+          "DB_HOST": "gateway01.us-east-1.prod.aws.tidbcloud.com",
+          "DB_PORT": "3306",
+          "DB_DATABASE": "asistencia",
+          "DB_USERNAME": "39BaeVvH61SYpuH.root",
+          "DB_PASSWORD": "jP0X0AqnpbT1fihI",
+          "FILESYSTEM_DISK": "s3",
+          "AWS_BUCKET": "asistencia-media-storage-production",
+          "AWS_USE_PATH_STYLE_ENDPOINT": "false",
+          "QUEUE_CONNECTION": "sqs",
+          "SQS_QUEUE": "${Token[TOKEN.8]}",
+          "SQS_PREFIX": "",
+          "SESSION_DRIVER": "cookie",
+          "CACHE_DRIVER": "array",
+          "SESSION_DOMAIN": ".asistencia.mrqn-labs.com",
+          "FRONTEND_URL": "https://asistencia.mrqn-labs.com",
+          "SANCTUM_STATEFUL_DOMAINS": "asistencia.mrqn-labs.com,api.asistencia.mrqn-labs.com",
+          "MYSQL_ATTR_SSL_CA": "/etc/pki/tls/certs/ca-bundle.crt"
+        },
+        "versionFunctions": true,
+        "deploymentMethod": "direct"
+      },
+      "plugins": {
+        "$ref": "$[\"service\"][\"plugins\"]"
+      },
+      "custom": {
+        "bucketName": "asistencia-media-storage-production",
+        "customDomain": {
+          "domainName": "api.asistencia.mrqn-labs.com",
+          "basePath": "",
+          "stage": "production",
+          "createRoute53Record": true,
+          "apiType": "http",
+          "endpointType": "regional",
+          "certificateArn": "arn:aws:acm:us-east-1:905418356464:certificate/f5b16420-08e0-4dbe-8d6a-edfc924bc943"
+        }
+      },
+      "functions": {
+        "api": {
+          "handler": "public/index.php",
+          "runtime": "provided.al2023",
+          "description": "Laravel API Asistencia",
+          "timeout": 28,
+          "events": [
+            {
+              "httpApi": "*"
+            }
+          ],
+          "name": "asistencia-api-production-api",
+          "layers": [
+            "arn:aws:lambda:us-east-1:873528684822:layer:php-82:18"
+          ],
+          "environment": {
+            "BREF_RUNTIME": "Bref\\FpmRuntime\\Main"
+          }
+        },
+        "jobsWorker": {
+          "handler": "Bref\\LaravelBridge\\Queue\\QueueHandler",
+          "runtime": "provided.al2023",
+          "timeout": 60,
+          "layers": [
+            "arn:aws:lambda:us-east-1:873528684822:layer:php-82:18"
+          ],
+          "environment": {
+            "BREF_RUNTIME": "Bref\\FunctionRuntime\\Main"
+          },
+          "events": [
+            {
+              "sqs": {
+                "arn": "${Token[TOKEN.16]}",
+                "batchSize": 1,
+                "maximumBatchingWindow": 0,
+                "functionResponseType": "ReportBatchItemFailures"
+              }
+            }
+          ],
+          "name": "asistencia-api-production-jobsWorker"
+        }
+      },
+      "constructs": {
+        "jobs": {
+          "type": "queue",
+          "worker": {
+            "handler": "Bref\\LaravelBridge\\Queue\\QueueHandler",
+            "runtime": "provided.al2023",
+            "timeout": 60,
+            "layers": [
+              "arn:aws:lambda:us-east-1:873528684822:layer:php-82:18"
+            ],
+            "environment": {
+              "BREF_RUNTIME": "Bref\\FunctionRuntime\\Main"
+            }
+          }
+        }
+      },
+      "package": {
+        "exclude": [
+          "node_modules/**",
+          "public/storage",
+          "resources/assets/**",
+          "storage/**",
+          "tests/**",
+          ".env"
+        ],
+        "artifactsS3KeyDirname": "serverless/asistencia-api/production/code-artifacts"
+      },
+      "resources": {
+        "Resources": {
+          "MediaStorageBucket": {
+            "Type": "AWS::S3::Bucket",
+            "Properties": {
+              "BucketName": "asistencia-media-storage-production"
+            }
+          }
+        }
+      }
+    },
+    "layers": {},
+    "isDashboardMonitoringPreconfigured": false,
+    "artifact": "/Users/wilianmarroquin/Proyectos/control-asistencia/.serverless/asistencia-api.zip"
+  },
+  "package": {
+    "artifactDirectoryName": "serverless/asistencia-api/production/1776394256530-2026-04-17T02:50:56.530Z",
+    "artifact": "asistencia-api.zip"
+  }
+}
