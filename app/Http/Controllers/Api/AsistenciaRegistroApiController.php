@@ -3,7 +3,9 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\AppBaseController;
+use App\Models\AsistenciaIntentoFallido;
 use App\Models\AsistenciaSesionToma;
+use App\Traits\AsistenciaRegistroTrait;
 use Aws\Rekognition\RekognitionClient;
 use Carbon\Carbon;
 use Illuminate\Routing\Controllers\HasMiddleware;
@@ -24,6 +26,7 @@ use Spatie\QueryBuilder\QueryBuilder;
 class AsistenciaRegistroApiController extends AppbaseController implements HasMiddleware
 {
 
+    use AsistenciaRegistroTrait;
     /**
      * @return array
      */
@@ -87,6 +90,14 @@ class AsistenciaRegistroApiController extends AppbaseController implements HasMi
             $toma = AsistenciaSesionToma::with('sesion.configuration')->findOrFail($request->toma_id);
             $config = $toma->sesion->configuration;
 
+            if ($this->tieneLimiteIntentosFallidos($user->id, $toma->id)) {
+                return $this->sendError('Acceso denegado: Has agotado el límite de 3 intentos fallidos para esta toma de asistencia.', 407);
+            }
+
+            if ($this->tomaEstaVencida($toma)) {
+                return $this->sendError('La toma de asistencia ya ha finalizado. No puedes registrar tu asistencia.', 407);
+            }
+
             // 1. Evitar duplicados
             if (AsistenciaRegistro::where('toma_asistencia_id', $toma->id)->where('alumno_id', $user->id)->exists()) {
                 return $this->sendError('Ya has registrado tu asistencia en esta toma.', 400);
@@ -94,7 +105,11 @@ class AsistenciaRegistroApiController extends AppbaseController implements HasMi
 
             // 2. Validación de PIN (OTP)
             if ($config->requiere_codigo_otp && ($request->codigo_otp !== $toma->codigo_otp)) {
-                return $this->sendError('El código OTP es incorrecto.', 400);
+                $bloqueado = $this->registrarIntentoFallido($user, $toma, 'OTP_INCORRECTO');
+                DB::commit();
+
+                $msg = $bloqueado ? 'Has sido bloqueado por múltiples intentos.' : 'El código OTP es incorrecto.';
+                return $this->sendError($msg, 400);
             }
 
             // 3. Validación de Coordenadas (Haversine)
@@ -109,7 +124,11 @@ class AsistenciaRegistroApiController extends AppbaseController implements HasMi
                 );
 
                 if ($distanciaCalculada > $toma->radio_metros) {
-                    return $this->sendError("Fuera de rango. Estás a " . round($distanciaCalculada) . "m del punto de origen.", 403);
+                    $bloqueado = $this->registrarIntentoFallido($user, $toma, 'GPS_FUERA_DE_RANGO');
+                    DB::commit();
+
+                    $msg = $bloqueado ? 'Has sido bloqueado.' : "Estás fuera de rango ({$distanciaCalculada}m).";
+                    return $this->sendError($msg, 400);
                 }
             }
 
@@ -144,9 +163,30 @@ class AsistenciaRegistroApiController extends AppbaseController implements HasMi
                 $confidence = $awsResult->get('Confidence');
 
                 if ($awsResult->get('Status') !== 'SUCCEEDED' || $confidence < 90.0) {
-                    return $this->sendError('Fallo en la prueba biométrica de vida. Grado de confianza: '. round($confidence, 2) . '%', 401);
+                    $bloqueado = $this->registrarIntentoFallido(
+                        $user,
+                        $toma,
+                        'LIVENESS_FALLIDO',
+                    );
+                    DB::commit();
+
+                    $msg = $bloqueado
+                        ? 'Has sido bloqueado por fallar múltiples pruebas biométricas.'
+                        : 'Fallo en la prueba biométrica de vida. Grado de confianza: ' . round($confidence, 2) . '%';
+
+                    return $this->sendError($msg, 401);
                 }
                 $livenessScore = $confidence;
+
+                // Extraemos los bytes de la foto en vivo que capturó el Liveness
+                $bytesFotoEnVivo = $awsResult->get('ReferenceImage')['Bytes'];
+
+                // 6. Almacenar Imagen de Evidencia (Spatie Media Library)
+                if ($awsResult && $awsResult->hasKey('ReferenceImage')) {
+                    $user->addMediaFromString($bytesFotoEnVivo) // 🚀 Usamos los bytes directos
+                    ->usingFileName("evidencia_{$user->id}_{$toma->id}_" . time() . ".jpg")
+                        ->toMediaCollection('asistencia_evidencias');
+                }
 
                 // 4.2 FASE 2: ¿Es el alumno correcto? (CompareFaces)
                 // Extraemos los bytes de la foto maestra desde Spatie usando Streams (funciona en local y en S3)
@@ -155,8 +195,7 @@ class AsistenciaRegistroApiController extends AppbaseController implements HasMi
                 $bytesFotoMaestra = stream_get_contents($stream);
                 fclose($stream);
 
-                // Extraemos los bytes de la foto en vivo que capturó el Liveness
-                $bytesFotoEnVivo = $awsResult->get('ReferenceImage')['Bytes'];
+                Log::info("Esta es la url de la foto certificada: " . $fotoMaestra->getUrl());
 
                 // Comparamos
                 $compareResult = $rekognition->compareFaces([
@@ -171,7 +210,19 @@ class AsistenciaRegistroApiController extends AppbaseController implements HasMi
 
                 // Si AWS devuelve un array de 'FaceMatches' vacío, significa que es OTRA persona
                 if (empty($compareResult->get('FaceMatches'))) {
-                    return $this->sendError('Alerta de Fraude: El rostro validado no coincide con el perfil certificado de este alumno.', 403);
+                    $bloqueado = $this->registrarIntentoFallido(
+                        $user,
+                        $toma,
+                        'ROSTRO_NO_COINCIDE',
+                    );
+
+                    DB::commit();
+
+                    $msg = $bloqueado
+                        ? 'Has sido bloqueado permanentemente de esta toma por múltiples intentos fallidos.'
+                        : 'Alerta de Fraude: El rostro validado no coincide con el perfil certificado de este alumno.';
+
+                    return $this->sendError($msg, 403);
                 }
 
                 // Si hace match, guardamos el porcentaje (opcional, por si lo agregas a la BD)
@@ -189,13 +240,6 @@ class AsistenciaRegistroApiController extends AppbaseController implements HasMi
                 'alumno_id'          => $user->id,
                 // 'similitud_facial'   => $similitudFacial, // Descomenta si agregas esta columna a tu DB para auditorías
             ]);
-
-            // 6. Almacenar Imagen de Evidencia (Spatie Media Library)
-            if ($awsResult && $awsResult->hasKey('ReferenceImage')) {
-                $user->addMediaFromString($bytesFotoEnVivo) // 🚀 Usamos los bytes directos
-                ->usingFileName("evidencia_{$user->id}_{$toma->id}_" . time() . ".jpg")
-                    ->toMediaCollection('asistencia_evidencias');
-            }
 
             DB::commit();
             return $this->sendResponse($registro->toArray(), '¡Asistencia biométrica verificada y aprobada!');
@@ -252,5 +296,34 @@ class AsistenciaRegistroApiController extends AppbaseController implements HasMi
     {
         $asistenciaregistro->delete();
         return $this->sendResponse(null, 'AsistenciaRegistro eliminado con éxito.');
+    }
+
+    private function registrarIntentoFallido($user, $toma, $motivo)
+    {
+        // 1. Guardar el strike
+        AsistenciaIntentoFallido::create([
+            'alumno_id'          => $user->id,
+            'toma_asistencia_id' => $toma->id,
+            'motivo'             => $motivo,
+        ]);
+
+        // 2. Contar cuántos strikes lleva en ESTA toma
+        $intentos = AsistenciaIntentoFallido::where('alumno_id', $user->id)
+            ->where('toma_asistencia_id', $toma->id)
+            ->count();
+
+        // 3. ¿Llegó al límite? Lo bloqueamos creando la asistencia reprobada
+        if ($intentos >= 3) {
+            AsistenciaRegistro::create([
+                'hora_registro'      => now()->format('H:i:s'),
+                'fue_aprobada'       => 0,
+                'toma_asistencia_id' => $toma->id,
+                'alumno_id'          => $user->id,
+            ]);
+
+            return true;
+        }
+
+        return false;
     }
 }
