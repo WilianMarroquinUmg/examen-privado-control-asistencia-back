@@ -224,7 +224,7 @@
           "S3Bucket": {
             "Ref": "ServerlessDeploymentBucket"
           },
-          "S3Key": "serverless/asistencia-api/production/1776447253318-2026-04-17T17:34:13.318Z/asistencia-api.zip"
+          "S3Key": "serverless/asistencia-api/production/1776456838180-2026-04-17T20:13:58.180Z/asistencia-api.zip"
         },
         "Handler": "public/index.php",
         "Runtime": "provided.al2023",
@@ -235,9 +235,10 @@
         "Environment": {
           "Variables": {
             "APP_URL": "https://api.asistencia.mrqn-labs.com",
-            "APP_ENV": "local",
-            "APP_DEBUG": "true",
+            "APP_ENV": "production",
+            "APP_DEBUG": "false",
             "APP_KEY": "base64:y7Ja4THYKMHJKSxrQbxtWmFeLvZNlEzaHFKXbl1ZJV8=",
+            "LOG_CHANNEL": "stderr",
             "DB_CONNECTION": "mysql",
             "DB_HOST": "gateway01.us-east-1.prod.aws.tidbcloud.com",
             "DB_PORT": "3306",
@@ -268,7 +269,8 @@
           ]
         },
         "Layers": [
-          "arn:aws:lambda:us-east-1:873528684822:layer:php-82:18"
+          "arn:aws:lambda:us-east-1:873528684822:layer:php-82:18",
+          "arn:aws:lambda:us-east-1:403367587399:layer:gd-php-82:21"
         ]
       },
       "DependsOn": [
@@ -282,7 +284,7 @@
           "S3Bucket": {
             "Ref": "ServerlessDeploymentBucket"
           },
-          "S3Key": "serverless/asistencia-api/production/1776447253318-2026-04-17T17:34:13.318Z/asistencia-api.zip"
+          "S3Key": "serverless/asistencia-api/production/1776456838180-2026-04-17T20:13:58.180Z/asistencia-api.zip"
         },
         "Handler": "Bref\\LaravelBridge\\Queue\\QueueHandler",
         "Runtime": "provided.al2023",
@@ -292,9 +294,10 @@
         "Environment": {
           "Variables": {
             "APP_URL": "https://api.asistencia.mrqn-labs.com",
-            "APP_ENV": "local",
-            "APP_DEBUG": "true",
+            "APP_ENV": "production",
+            "APP_DEBUG": "false",
             "APP_KEY": "base64:y7Ja4THYKMHJKSxrQbxtWmFeLvZNlEzaHFKXbl1ZJV8=",
+            "LOG_CHANNEL": "stderr",
             "DB_CONNECTION": "mysql",
             "DB_HOST": "gateway01.us-east-1.prod.aws.tidbcloud.com",
             "DB_PORT": "3306",
@@ -325,32 +328,33 @@
           ]
         },
         "Layers": [
-          "arn:aws:lambda:us-east-1:873528684822:layer:php-82:18"
+          "arn:aws:lambda:us-east-1:873528684822:layer:php-82:18",
+          "arn:aws:lambda:us-east-1:403367587399:layer:gd-php-82:21"
         ]
       },
       "DependsOn": [
         "JobsWorkerLogGroup"
       ]
     },
-    "ApiLambdaVersionw0KsYwqtodPA4kkpTLOPpgf9dj6VmWSThmQRLlyOIE": {
+    "ApiLambdaVersionHmktoHSdDgAMaDSiKIQBg7HMWRBp4AxOsUnA": {
       "Type": "AWS::Lambda::Version",
       "DeletionPolicy": "Retain",
       "Properties": {
         "FunctionName": {
           "Ref": "ApiLambdaFunction"
         },
-        "CodeSha256": "nbCUWXZrywAXcuTjsfA2PV6/HASecPta/cDWL5yqW/w=",
+        "CodeSha256": "akRC6uh5mRsWW5Yky+Zdm5mFI6VTlm+q00q8LCZde3w=",
         "Description": "Laravel API Asistencia"
       }
     },
-    "JobsWorkerLambdaVersionIJkswO2H6l7xTpQDMS9UxNDnk5hCiHyRM1JRyLoYFM": {
+    "JobsWorkerLambdaVersiontG9qgPxXgyhEO9hrKopzMjP8xKSTjH12MrXUOinYYw0": {
       "Type": "AWS::Lambda::Version",
       "DeletionPolicy": "Retain",
       "Properties": {
         "FunctionName": {
           "Ref": "JobsWorkerLambdaFunction"
         },
-        "CodeSha256": "nbCUWXZrywAXcuTjsfA2PV6/HASecPta/cDWL5yqW/w="
+        "CodeSha256": "akRC6uh5mRsWW5Yky+Zdm5mFI6VTlm+q00q8LCZde3w="
       }
     },
     "JobsWorkerEventSourceMappingSQSJobsQueueCEDBAE3E": {
@@ -520,7 +524,7 @@
     "ApiLambdaFunctionQualifiedArn": {
       "Description": "Current Lambda function version",
       "Value": {
-        "Ref": "ApiLambdaVersionw0KsYwqtodPA4kkpTLOPpgf9dj6VmWSThmQRLlyOIE"
+        "Ref": "ApiLambdaVersionHmktoHSdDgAMaDSiKIQBg7HMWRBp4AxOsUnA"
       },
       "Export": {
         "Name": "sls-asistencia-api-production-ApiLambdaFunctionQualifiedArn"
@@ -529,7 +533,7 @@
     "JobsWorkerLambdaFunctionQualifiedArn": {
       "Description": "Current Lambda function version",
       "Value": {
-        "Ref": "JobsWorkerLambdaVersionIJkswO2H6l7xTpQDMS9UxNDnk5hCiHyRM1JRyLoYFM"
+        "Ref": "JobsWorkerLambdaVersiontG9qgPxXgyhEO9hrKopzMjP8xKSTjH12MrXUOinYYw0"
       },
       "Export": {
         "Name": "sls-asistencia-api-production-JobsWorkerLambdaFunctionQualifiedArn"

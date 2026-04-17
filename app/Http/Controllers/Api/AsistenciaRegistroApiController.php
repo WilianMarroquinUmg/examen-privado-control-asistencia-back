@@ -125,14 +125,19 @@ class AsistenciaRegistroApiController extends AppbaseController implements HasMi
                     return $this->sendError('No tienes un perfil biométrico certificado. No puedes registrar asistencia por IA.', 403);
                 }
 
-                $rekognition = new \Aws\Rekognition\RekognitionClient([
-                    'region' => env('AWS_DEFAULT_REGION', 'us-east-1'),
-                    'version' => 'latest',
-                    'credentials' => [
+                $awsOptions = [
+                    'region'  => env('AWS_DEFAULT_REGION', 'us-east-1'),
+                    'version' => 'latest'
+                ];
+
+                if (app()->environment('local')) {
+                    $awsOptions['credentials'] = [
                         'key'    => env('AWS_ACCESS_KEY_ID'),
                         'secret' => env('AWS_SECRET_ACCESS_KEY'),
-                    ]
-                ]);
+                    ];
+                }
+
+                $rekognition = new \Aws\Rekognition\RekognitionClient($awsOptions);
 
                 // 4.1 FASE 1: ¿Es un humano vivo? (Liveness)
                 $awsResult = $rekognition->getFaceLivenessSessionResults(['SessionId' => $request->aws_session_id]);
@@ -187,8 +192,8 @@ class AsistenciaRegistroApiController extends AppbaseController implements HasMi
 
             // 6. Almacenar Imagen de Evidencia (Spatie Media Library)
             if ($awsResult && $awsResult->hasKey('ReferenceImage')) {
-                $user->addMediaFromBase64(base64_encode($bytesFotoEnVivo))
-                    ->usingFileName("evidencia_{$user->id}_{$toma->id}_" . time() . ".jpg")
+                $user->addMediaFromString($bytesFotoEnVivo) // 🚀 Usamos los bytes directos
+                ->usingFileName("evidencia_{$user->id}_{$toma->id}_" . time() . ".jpg")
                     ->toMediaCollection('asistencia_evidencias');
             }
 

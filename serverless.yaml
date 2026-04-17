@@ -28,9 +28,10 @@ provider:
   # 🚀 CORRECCIÓN 1: environment vuelve a su hogar dentro de provider
   environment:
     APP_URL: https://api.asistencia.mrqn-labs.com
-    APP_ENV: local
-    APP_DEBUG: true
+    APP_ENV: production
+    APP_DEBUG: false
     APP_KEY: ${ssm:/asistencia/APP_KEY}
+    LOG_CHANNEL: stderr
 
     # Base de datos
     DB_CONNECTION: mysql
@@ -64,6 +65,7 @@ plugins:
   - ./vendor/bref/bref
   - serverless-domain-manager
   - serverless-lift
+  - ./vendor/bref/extra-php-extensions # 🚀 1. Agrega esta línea
 
 custom:
   bucketName: asistencia-media-storage-${self:provider.stage}
@@ -84,6 +86,8 @@ functions:
     timeout: 28
     events:
       - httpApi: '*'
+    layers:
+      - ${bref-extra:gd-php-82}
 
 constructs:
   jobs:
@@ -92,6 +96,8 @@ constructs:
       handler: Bref\LaravelBridge\Queue\QueueHandler
       runtime: php-82
       timeout: 60
+      layers:
+        - ${bref-extra:gd-php-82}
 
 package:
   exclude:
@@ -101,6 +107,10 @@ package:
     - storage/**
     - tests/**
     - .env
+    - .git/** # 🚀 EL CULPABLE #1 (Tiene miles de archivos invisibles)
+    - .github/** # 🚀 (Si usas Github Actions)
+    - .vscode/** # 🚀 (Si usas VSCode)
+    - .idea/** # 🚀 (Si usas PhpStorm)
 
 # 🚀 CORRECCIÓN 2: resources se va hasta el puro final del archivo, alineado a la izquierda
 resources:

@@ -150,53 +150,95 @@ class AsistenciaSesionTomaApiController extends AppbaseController implements Has
 
     public function solicitarLiveness(Request $request): JsonResponse
     {
-        // 1. Validamos que el frontend nos mande la toma a la que se quiere registrar
         $request->validate([
             'toma_id' => 'required|exists:asistencia_sesion_tomas,id'
         ]);
 
         try {
-            // 2. Instanciamos el cliente de AWS Rekognition
-            // (Laravel tomará las credenciales automáticamente de tu .env)
-            $rekognition = new RekognitionClient([
+            // 🚀 1. Opciones Base (Obligatorias en ambos entornos)
+            $awsOptions = [
                 'region'  => env('AWS_DEFAULT_REGION', 'us-east-1'),
-                'version' => 'latest',
-                'credentials' => [
+                'version' => 'latest'
+            ];
+
+            // 🚀 2. Validación Maestra de Entorno
+            // Si estamos en local, inyectamos las llaves del .env
+            // Si estamos en producción (Serverless), lo omitimos para que use el IAM Role
+            if (app()->environment('local')) {
+                $awsOptions['credentials'] = [
                     'key'    => env('AWS_ACCESS_KEY_ID'),
                     'secret' => env('AWS_SECRET_ACCESS_KEY'),
-                ]
-            ]);
+                ];
+            }
 
-            // 3. AWS hace su magia y nos crea un "espacio" para el escaneo facial
+            // 3. Instanciamos el cliente con las opciones dinámicas
+            $rekognition = new RekognitionClient($awsOptions);
+
             $result = $rekognition->createFaceLivenessSession([]);
-
             $sessionId = $result->get('SessionId');
-
-            // 🔥 TIP DE ARQUITECTO:
-            // Aquí podrías guardar temporalmente el $sessionId en la base de datos o en Caché
-            // asociado al alumno y la toma_id, para evitar que usen IDs de otros.
-            // Cache::put("liveness_{$sessionId}", ['toma_id' => $request->toma_id, 'alumno_id' => Auth::id()], now()->addMinutes(10));
 
             return $this->sendResponse([
                 'session_id' => $sessionId,
-                ],
+            ],
                 'Liveness session creada exitosamente. Usa este ID para iniciar el escaneo facial.'
             );
 
         } catch (AwsException $e) {
-            // AWS falló (Credenciales malas, permisos IAM, región incorrecta)
-            Log::error('AWS Error en Liveness: ' . $e->getAwsErrorMessage(), [
-                'alumno_id' => Auth::id(),
-                'toma_id' => $request->toma_id
-            ]);
-
-            return $this->sendError('Error al crear la sesión de Liveness. Por favor, intenta nuevamente más tarde.', 500);
-
+            return $this->sendError('AWS Error: ' . $e->getAwsErrorMessage(), 500);
         } catch (\Exception $e) {
-            // Error general de PHP/Laravel
-            Log::error('Error general al solicitar Liveness: ' . $e->getMessage());
-
-            return $this->sendError('Ocurrió un error inesperado. Por favor, intenta nuevamente más tarde.', 500);
+            return $this->sendError('Error de Laravel: ' . $e->getMessage(), 500);
         }
     }
+
+//    public function solicitarLiveness(Request $request): JsonResponse
+//    {
+//        // 1. Validamos que el frontend nos mande la toma a la que se quiere registrar
+//        $request->validate([
+//            'toma_id' => 'required|exists:asistencia_sesion_tomas,id'
+//        ]);
+//
+//        try {
+//            // 2. Instanciamos el cliente de AWS Rekognition
+//            // (Laravel tomará las credenciales automáticamente de tu .env)
+//            $rekognition = new RekognitionClient([
+//                'region'  => env('AWS_DEFAULT_REGION', 'us-east-1'),
+//                'version' => 'latest',
+//                'credentials' => [
+//                    'key'    => env('AWS_ACCESS_KEY_ID'),
+//                    'secret' => env('AWS_SECRET_ACCESS_KEY'),
+//                ]
+//            ]);
+//
+//            // 3. AWS hace su magia y nos crea un "espacio" para el escaneo facial
+//            $result = $rekognition->createFaceLivenessSession([]);
+//
+//            $sessionId = $result->get('SessionId');
+//
+//            // 🔥 TIP DE ARQUITECTO:
+//            // Aquí podrías guardar temporalmente el $sessionId en la base de datos o en Caché
+//            // asociado al alumno y la toma_id, para evitar que usen IDs de otros.
+//            // Cache::put("liveness_{$sessionId}", ['toma_id' => $request->toma_id, 'alumno_id' => Auth::id()], now()->addMinutes(10));
+//
+//            return $this->sendResponse([
+//                'session_id' => $sessionId,
+//                ],
+//                'Liveness session creada exitosamente. Usa este ID para iniciar el escaneo facial.'
+//            );
+//
+//        } catch (AwsException $e) {
+//            // AWS falló (Credenciales malas, permisos IAM, región incorrecta)
+//            Log::error('AWS Error en Liveness: ' . $e->getAwsErrorMessage(), [
+//                'alumno_id' => Auth::id(),
+//                'toma_id' => $request->toma_id
+//            ]);
+//
+//            return $this->sendError('Error al crear la sesión de Liveness. Por favor, intenta nuevamente más tarde.', 500);
+//
+//        } catch (\Exception $e) {
+//            // Error general de PHP/Laravel
+//            Log::error('Error general al solicitar Liveness: ' . $e->getMessage());
+//
+//            return $this->sendError('Ocurrió un error inesperado. Por favor, intenta nuevamente más tarde.', 500);
+//        }
+//    }
 }
