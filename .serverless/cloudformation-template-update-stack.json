@@ -224,7 +224,7 @@
           "S3Bucket": {
             "Ref": "ServerlessDeploymentBucket"
           },
-          "S3Key": "serverless/asistencia-api/production/1776394256530-2026-04-17T02:50:56.530Z/asistencia-api.zip"
+          "S3Key": "serverless/asistencia-api/production/1776401814489-2026-04-17T04:56:54.489Z/asistencia-api.zip"
         },
         "Handler": "public/index.php",
         "Runtime": "provided.al2023",
@@ -235,8 +235,8 @@
         "Environment": {
           "Variables": {
             "APP_URL": "https://api.asistencia.mrqn-labs.com",
-            "APP_ENV": "production",
-            "APP_DEBUG": "false",
+            "APP_ENV": "local",
+            "APP_DEBUG": "true",
             "APP_KEY": "base64:y7Ja4THYKMHJKSxrQbxtWmFeLvZNlEzaHFKXbl1ZJV8=",
             "DB_CONNECTION": "mysql",
             "DB_HOST": "gateway01.us-east-1.prod.aws.tidbcloud.com",
@@ -282,7 +282,7 @@
           "S3Bucket": {
             "Ref": "ServerlessDeploymentBucket"
           },
-          "S3Key": "serverless/asistencia-api/production/1776394256530-2026-04-17T02:50:56.530Z/asistencia-api.zip"
+          "S3Key": "serverless/asistencia-api/production/1776401814489-2026-04-17T04:56:54.489Z/asistencia-api.zip"
         },
         "Handler": "Bref\\LaravelBridge\\Queue\\QueueHandler",
         "Runtime": "provided.al2023",
@@ -292,8 +292,8 @@
         "Environment": {
           "Variables": {
             "APP_URL": "https://api.asistencia.mrqn-labs.com",
-            "APP_ENV": "production",
-            "APP_DEBUG": "false",
+            "APP_ENV": "local",
+            "APP_DEBUG": "true",
             "APP_KEY": "base64:y7Ja4THYKMHJKSxrQbxtWmFeLvZNlEzaHFKXbl1ZJV8=",
             "DB_CONNECTION": "mysql",
             "DB_HOST": "gateway01.us-east-1.prod.aws.tidbcloud.com",
@@ -332,25 +332,25 @@
         "JobsWorkerLogGroup"
       ]
     },
-    "ApiLambdaVersionFkXKgNAz9uzDlmWjeEgHB07OPoLC1AKtyXRAUIOE": {
+    "ApiLambdaVersion3PxIjQvyWyhCaWTleOS6PObkyOFYbstqzybcC7KOGBs": {
       "Type": "AWS::Lambda::Version",
       "DeletionPolicy": "Retain",
       "Properties": {
         "FunctionName": {
           "Ref": "ApiLambdaFunction"
         },
-        "CodeSha256": "w075jHKQDXNdEaQHI5MHma2zXd0MrHVHyyRaHZmbn1M=",
+        "CodeSha256": "QGJLHgaGlcHlYCag/MAsKQOfVg8xFrPf8TtIieNKCl4=",
         "Description": "Laravel API Asistencia"
       }
     },
-    "JobsWorkerLambdaVersion6cESQQIxjVyBSxncZX2ouEmnx5u2srR5v1XkmFHHQo": {
+    "JobsWorkerLambdaVersiontPzzgLAsm4E6DWTDQ7nHriLlCeBiY2r2IHbpormk": {
       "Type": "AWS::Lambda::Version",
       "DeletionPolicy": "Retain",
       "Properties": {
         "FunctionName": {
           "Ref": "JobsWorkerLambdaFunction"
         },
-        "CodeSha256": "w075jHKQDXNdEaQHI5MHma2zXd0MrHVHyyRaHZmbn1M="
+        "CodeSha256": "QGJLHgaGlcHlYCag/MAsKQOfVg8xFrPf8TtIieNKCl4="
       }
     },
     "JobsWorkerEventSourceMappingSQSJobsQueueCEDBAE3E": {
@@ -520,7 +520,7 @@
     "ApiLambdaFunctionQualifiedArn": {
       "Description": "Current Lambda function version",
       "Value": {
-        "Ref": "ApiLambdaVersionFkXKgNAz9uzDlmWjeEgHB07OPoLC1AKtyXRAUIOE"
+        "Ref": "ApiLambdaVersion3PxIjQvyWyhCaWTleOS6PObkyOFYbstqzybcC7KOGBs"
       },
       "Export": {
         "Name": "sls-asistencia-api-production-ApiLambdaFunctionQualifiedArn"
@@ -529,7 +529,7 @@
     "JobsWorkerLambdaFunctionQualifiedArn": {
       "Description": "Current Lambda function version",
       "Value": {
-        "Ref": "JobsWorkerLambdaVersion6cESQQIxjVyBSxncZX2ouEmnx5u2srR5v1XkmFHHQo"
+        "Ref": "JobsWorkerLambdaVersiontPzzgLAsm4E6DWTDQ7nHriLlCeBiY2r2IHbpormk"
       },
       "Export": {
         "Name": "sls-asistencia-api-production-JobsWorkerLambdaFunctionQualifiedArn"

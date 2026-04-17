@@ -28,8 +28,8 @@ provider:
   # 🚀 CORRECCIÓN 1: environment vuelve a su hogar dentro de provider
   environment:
     APP_URL: https://api.asistencia.mrqn-labs.com
-    APP_ENV: production
-    APP_DEBUG: false
+    APP_ENV: local
+    APP_DEBUG: true
     APP_KEY: ${ssm:/asistencia/APP_KEY}
 
     # Base de datos
