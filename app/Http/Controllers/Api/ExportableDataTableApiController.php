@@ -130,11 +130,15 @@ class ExportableDataTableApiController extends AppBaseController
             }
 
             // ==========================================
-            // 🚀 1. RUTA EXCLUSIVA PARA PDF (TU PLANTILLA)
+            // 🚀 1. RUTA EXCLUSIVA PARA PDF (DOMPDF)
             // ==========================================
             if ($format === 'pdf') {
-                // A. Mapeamos y aplanamos la data para que tu vista Blade
-                //    pueda leerla limpiamente con data_get()
+
+                // 🛡️ SOBREESCRITURA DE RUTAS PARA LAMBDA
+                config(['dompdf.options.temp_dir' => sys_get_temp_dir()]);
+                config(['dompdf.options.font_dir' => sys_get_temp_dir()]);
+                config(['dompdf.options.font_cache' => sys_get_temp_dir()]);
+
                 $dataParaPdf = collect($datos)->map(function($row) {
                     $asistidas = $row['asistencias_completas'] ?? $row['estadisticas']['tomas_asistidas'] ?? 0;
                     $total = $row['total_sesiones'] ?? $row['estadisticas']['total_tomas_curso'] ?? 0;
@@ -149,7 +153,6 @@ class ExportableDataTableApiController extends AppBaseController
                     ];
                 })->toArray();
 
-                // B. Definimos las columnas exactas que leerá el @foreach en Blade
                 $columnas = [
                     ['key' => 'carnet',     'title' => 'Carnet'],
                     ['key' => 'estudiante', 'title' => 'Estudiante'],
@@ -158,32 +161,54 @@ class ExportableDataTableApiController extends AppBaseController
                     ['key' => 'estado',     'title' => 'Estado'],
                 ];
 
-                // C. Generamos el PDF usando tu vista
-                $pdf = Pdf::loadView('datatables_exports.export_pdf', [
+                $pdf = \Barryvdh\DomPDF\Facade\Pdf::loadView('datatables_exports.export_pdf', [
                     'data'    => $dataParaPdf,
                     'columns' => $columnas,
                     'title'   => 'Status de Asistencia',
-                    'user'    => Auth::user()->nombre_corto
-                ])->setPaper('a4', 'landscape'); // 🚀 Te recomiendo landscape para que la tabla quepa bien
+                    'user'    => Auth::user()->nombre_corto ?? 'Sistema'
+                ])->setPaper('a4', 'landscape');
 
-                return $pdf->download("Status_Asistencia.pdf");
+                // 🚀 RETORNO BINARIO SEGURO PARA BREF/LAMBDA
+                return response($pdf->output(), 200, [
+                    'Content-Type'              => 'application/pdf',
+                    'Content-Disposition'       => 'attachment; filename="Status_Asistencia.pdf"',
+                    'Content-Transfer-Encoding' => 'binary',
+                ]);
             }
 
             // ==========================================
             // 🚀 2. RUTA PARA EXCEL Y CSV (MAATWEBSITE)
             // ==========================================
+
+            // 🛡️ Aseguramos que Excel use el disco temporal de Lambda
+            config(['excel.exports.temporary_files.local_path' => sys_get_temp_dir()]);
+
             $export = new StatusAsistenciaExport($datos);
-            $writer = \Maatwebsite\Excel\Excel::XLSX;
 
             if ($format === 'csv') {
-                $writer = \Maatwebsite\Excel\Excel::CSV;
                 config(['excel.exports.csv.use_bom' => true]);
+                $content = \Maatwebsite\Excel\Facades\Excel::raw($export, \Maatwebsite\Excel\Excel::CSV);
+                $contentType = 'text/csv';
+            } else {
+                $content = \Maatwebsite\Excel\Facades\Excel::raw($export, \Maatwebsite\Excel\Excel::XLSX);
+                $contentType = 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet';
             }
 
-            return $export->download("Status_Asistencia.$format", $writer);
+            // 🚀 RETORNO BINARIO SEGURO PARA BREF/LAMBDA
+            return response($content, 200, [
+                'Content-Type'              => $contentType,
+                'Content-Disposition'       => "attachment; filename=Status_Asistencia.$format",
+                'Content-Transfer-Encoding' => 'binary',
+            ]);
 
         } catch (\Exception $e) {
-            return response()->json(['error' => 'Error al exportar: ' . $e->getMessage()], 500);
+            // Logueamos el error real en CloudWatch para auditoría
+            \Log::error("Error en Exportación Lambda: " . $e->getMessage());
+
+            return response()->json([
+                'error' => 'Error al exportar reporte.',
+                'message' => $e->getMessage()
+            ], 500);
         }
     }
 

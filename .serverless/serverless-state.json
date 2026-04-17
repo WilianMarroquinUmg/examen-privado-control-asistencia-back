@@ -9,6 +9,14 @@
       "region": "us-east-1",
       "stage": "production",
       "memorySize": 1024,
+      "apiGateway": {
+        "binaryMediaTypes": [
+          "application/pdf",
+          "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+          "text/csv",
+          "*/*"
+        ]
+      },
       "iam": {
         "role": {
           "statements": [
@@ -57,8 +65,8 @@
       },
       "environment": {
         "APP_URL": "https://api.asistencia.mrqn-labs.com",
-        "APP_ENV": "production",
-        "APP_DEBUG": "false",
+        "APP_ENV": "local",
+        "APP_DEBUG": "true",
         "APP_KEY": "base64:y7Ja4THYKMHJKSxrQbxtWmFeLvZNlEzaHFKXbl1ZJV8=",
         "LOG_CHANNEL": "stderr",
         "DB_CONNECTION": "mysql",
@@ -279,7 +287,7 @@
                 "S3Bucket": {
                   "Ref": "ServerlessDeploymentBucket"
                 },
-                "S3Key": "serverless/asistencia-api/production/1776465273819-2026-04-17T22:34:33.819Z/asistencia-api.zip"
+                "S3Key": "serverless/asistencia-api/production/1776467533699-2026-04-17T23:12:13.699Z/asistencia-api.zip"
               },
               "Handler": "public/index.php",
               "Runtime": "provided.al2023",
@@ -290,8 +298,8 @@
               "Environment": {
                 "Variables": {
                   "APP_URL": "https://api.asistencia.mrqn-labs.com",
-                  "APP_ENV": "production",
-                  "APP_DEBUG": "false",
+                  "APP_ENV": "local",
+                  "APP_DEBUG": "true",
                   "APP_KEY": "base64:y7Ja4THYKMHJKSxrQbxtWmFeLvZNlEzaHFKXbl1ZJV8=",
                   "LOG_CHANNEL": "stderr",
                   "DB_CONNECTION": "mysql",
@@ -339,7 +347,7 @@
                 "S3Bucket": {
                   "Ref": "ServerlessDeploymentBucket"
                 },
-                "S3Key": "serverless/asistencia-api/production/1776465273819-2026-04-17T22:34:33.819Z/asistencia-api.zip"
+                "S3Key": "serverless/asistencia-api/production/1776467533699-2026-04-17T23:12:13.699Z/asistencia-api.zip"
               },
               "Handler": "Bref\\LaravelBridge\\Queue\\QueueHandler",
               "Runtime": "provided.al2023",
@@ -349,8 +357,8 @@
               "Environment": {
                 "Variables": {
                   "APP_URL": "https://api.asistencia.mrqn-labs.com",
-                  "APP_ENV": "production",
-                  "APP_DEBUG": "false",
+                  "APP_ENV": "local",
+                  "APP_DEBUG": "true",
                   "APP_KEY": "base64:y7Ja4THYKMHJKSxrQbxtWmFeLvZNlEzaHFKXbl1ZJV8=",
                   "LOG_CHANNEL": "stderr",
                   "DB_CONNECTION": "mysql",
@@ -391,25 +399,25 @@
               "JobsWorkerLogGroup"
             ]
           },
-          "ApiLambdaVersionW2M5oosaqZQsMQMnos1ndHV8uAnEEv5jdjKflb0zoU": {
+          "ApiLambdaVersiondpDjTiHDnQw98WAkWAvguhGl3VYfLe1HeveEcqaUxU": {
             "Type": "AWS::Lambda::Version",
             "DeletionPolicy": "Retain",
             "Properties": {
               "FunctionName": {
                 "Ref": "ApiLambdaFunction"
               },
-              "CodeSha256": "XMe2H9G1QFQ5CmEud9zPdoCA1hNtqr1+4NPLZWBO2S0=",
+              "CodeSha256": "mj3/OPtSt1F9QMl0A4AEucNsnVDLi8OJvq7Njg/ruOk=",
               "Description": "Laravel API Asistencia"
             }
           },
-          "JobsWorkerLambdaVersionBGbjmGOf9iBv3Iv9WGq2D71adgebiDrLesiYIf8Q": {
+          "JobsWorkerLambdaVersioncGBcY0Lv9wCtKNDjRwFkYtmjMXagLBdaPUFrrp3nBN0": {
             "Type": "AWS::Lambda::Version",
             "DeletionPolicy": "Retain",
             "Properties": {
               "FunctionName": {
                 "Ref": "JobsWorkerLambdaFunction"
               },
-              "CodeSha256": "XMe2H9G1QFQ5CmEud9zPdoCA1hNtqr1+4NPLZWBO2S0="
+              "CodeSha256": "mj3/OPtSt1F9QMl0A4AEucNsnVDLi8OJvq7Njg/ruOk="
             }
           },
           "JobsWorkerEventSourceMappingSQSJobsQueueCEDBAE3E": {
@@ -576,7 +584,7 @@
           "ApiLambdaFunctionQualifiedArn": {
             "Description": "Current Lambda function version",
             "Value": {
-              "Ref": "ApiLambdaVersionW2M5oosaqZQsMQMnos1ndHV8uAnEEv5jdjKflb0zoU"
+              "Ref": "ApiLambdaVersiondpDjTiHDnQw98WAkWAvguhGl3VYfLe1HeveEcqaUxU"
             },
             "Export": {
               "Name": "sls-asistencia-api-production-ApiLambdaFunctionQualifiedArn"
@@ -585,7 +593,7 @@
           "JobsWorkerLambdaFunctionQualifiedArn": {
             "Description": "Current Lambda function version",
             "Value": {
-              "Ref": "JobsWorkerLambdaVersionBGbjmGOf9iBv3Iv9WGq2D71adgebiDrLesiYIf8Q"
+              "Ref": "JobsWorkerLambdaVersioncGBcY0Lv9wCtKNDjRwFkYtmjMXagLBdaPUFrrp3nBN0"
             },
             "Export": {
               "Name": "sls-asistencia-api-production-JobsWorkerLambdaFunctionQualifiedArn"
@@ -773,7 +781,7 @@
         "package": {},
         "memory": 1024,
         "vpc": {},
-        "versionLogicalId": "ApiLambdaVersionW2M5oosaqZQsMQMnos1ndHV8uAnEEv5jdjKflb0zoU"
+        "versionLogicalId": "ApiLambdaVersiondpDjTiHDnQw98WAkWAvguhGl3VYfLe1HeveEcqaUxU"
       },
       "jobsWorker": {
         "handler": "Bref\\LaravelBridge\\Queue\\QueueHandler",
@@ -801,7 +809,7 @@
         "package": {},
         "memory": 1024,
         "vpc": {},
-        "versionLogicalId": "JobsWorkerLambdaVersionBGbjmGOf9iBv3Iv9WGq2D71adgebiDrLesiYIf8Q"
+        "versionLogicalId": "JobsWorkerLambdaVersioncGBcY0Lv9wCtKNDjRwFkYtmjMXagLBdaPUFrrp3nBN0"
       }
     },
     "resources": {
@@ -873,6 +881,14 @@
         "region": "us-east-1",
         "stage": "production",
         "memorySize": 1024,
+        "apiGateway": {
+          "binaryMediaTypes": [
+            "application/pdf",
+            "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+            "text/csv",
+            "*/*"
+          ]
+        },
         "iam": {
           "role": {
             "statements": [
@@ -908,7 +924,7 @@
                   "sqs:ChangeMessageVisibility"
                 ],
                 "Resource": [
-                  "${Token[TOKEN.21]}"
+                  "${Token[TOKEN.25]}"
                 ]
               }
             ]
@@ -916,8 +932,8 @@
         },
         "environment": {
           "APP_URL": "https://api.asistencia.mrqn-labs.com",
-          "APP_ENV": "production",
-          "APP_DEBUG": "false",
+          "APP_ENV": "local",
+          "APP_DEBUG": "true",
           "APP_KEY": "base64:y7Ja4THYKMHJKSxrQbxtWmFeLvZNlEzaHFKXbl1ZJV8=",
           "LOG_CHANNEL": "stderr",
           "DB_CONNECTION": "mysql",
@@ -930,7 +946,7 @@
           "AWS_BUCKET": "asistencia-media-storage-production",
           "AWS_USE_PATH_STYLE_ENDPOINT": "false",
           "QUEUE_CONNECTION": "sqs",
-          "SQS_QUEUE": "${Token[TOKEN.13]}",
+          "SQS_QUEUE": "${Token[TOKEN.17]}",
           "SQS_PREFIX": "",
           "SESSION_DRIVER": "cookie",
           "CACHE_DRIVER": "array",
@@ -991,7 +1007,7 @@
           "events": [
             {
               "sqs": {
-                "arn": "${Token[TOKEN.21]}",
+                "arn": "${Token[TOKEN.25]}",
                 "batchSize": 1,
                 "maximumBatchingWindow": 0,
                 "functionResponseType": "ReportBatchItemFailures"
@@ -1049,7 +1065,7 @@
     "artifact": "C:\\laragon\\www\\control-asistencia-back\\.serverless\\asistencia-api.zip"
   },
   "package": {
-    "artifactDirectoryName": "serverless/asistencia-api/production/1776465273819-2026-04-17T22:34:33.819Z",
+    "artifactDirectoryName": "serverless/asistencia-api/production/1776467533699-2026-04-17T23:12:13.699Z",
     "artifact": "asistencia-api.zip"
   }
 }
