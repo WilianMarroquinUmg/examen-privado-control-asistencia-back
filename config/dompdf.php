@@ -45,7 +45,10 @@ return [
          * Times-Roman, Times-Bold, Times-BoldItalic, Times-Italic,
          * Symbol, ZapfDingbats.
          */
-        'font_dir' => storage_path('fonts'), // advised by dompdf (https://github.com/dompdf/dompdf/pull/782)
+
+        'temp_dir' => env('APP_ENV') === 'local' ? storage_path('app') : '/tmp',
+        'font_dir' => env('APP_ENV') === 'local' ? storage_path('app/fonts') : '/tmp/fonts',
+        'font_cache' => env('APP_ENV') === 'local' ? storage_path('app/fonts') : '/tmp/fonts',
 
         /**
          * The location of the DOMPDF font cache directory
@@ -55,7 +58,6 @@ return [
          *
          * Note: This directory must exist and be writable by the webserver process.
          */
-        'font_cache' => storage_path('fonts'),
 
         /**
          * The location of a temporary directory.
@@ -64,7 +66,6 @@ return [
          * The temporary directory is required to download remote images and when
          * using the PDFLib back end.
          */
-        'temp_dir' => sys_get_temp_dir(),
 
         /**
          * ==== IMPORTANT ====
