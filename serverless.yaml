@@ -6,12 +6,6 @@ provider:
   stage: production
   memorySize: 1024
 
-  apiGateway:
-    binaryMediaTypes:
-      - 'application/pdf'
-      - 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
-      - 'text/csv'
-      - '*/*'
 
   # 🚀 Permisos nativos para que Laravel hable con Rekognition y S3
   iam:
@@ -35,10 +29,11 @@ provider:
   # 🚀 CORRECCIÓN 1: environment vuelve a su hogar dentro de provider
   environment:
     APP_URL: https://api.asistencia.mrqn-labs.com
-    APP_ENV: local
-    APP_DEBUG: true
+    APP_ENV: production
+    APP_DEBUG: false
     APP_KEY: ${ssm:/asistencia/APP_KEY}
     LOG_CHANNEL: stderr
+    BREF_BINARY_RESPONSES: '1'
 
     # Base de datos
     DB_CONNECTION: mysql
@@ -67,6 +62,10 @@ provider:
 
     # Certificado DB
     MYSQL_ATTR_SSL_CA: /etc/pki/tls/certs/ca-bundle.crt
+
+  apiGateway:
+    binaryMediaTypes:
+      - '*/*'
 
 plugins:
   - ./vendor/bref/bref

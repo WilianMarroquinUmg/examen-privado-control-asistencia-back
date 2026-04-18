@@ -224,7 +224,7 @@
           "S3Bucket": {
             "Ref": "ServerlessDeploymentBucket"
           },
-          "S3Key": "serverless/asistencia-api/production/1776467533699-2026-04-17T23:12:13.699Z/asistencia-api.zip"
+          "S3Key": "serverless/asistencia-api/production/1776531327146-2026-04-18T16:55:27.146Z/asistencia-api.zip"
         },
         "Handler": "public/index.php",
         "Runtime": "provided.al2023",
@@ -235,10 +235,11 @@
         "Environment": {
           "Variables": {
             "APP_URL": "https://api.asistencia.mrqn-labs.com",
-            "APP_ENV": "local",
-            "APP_DEBUG": "true",
+            "APP_ENV": "production",
+            "APP_DEBUG": "false",
             "APP_KEY": "base64:y7Ja4THYKMHJKSxrQbxtWmFeLvZNlEzaHFKXbl1ZJV8=",
             "LOG_CHANNEL": "stderr",
+            "BREF_BINARY_RESPONSES": "1",
             "DB_CONNECTION": "mysql",
             "DB_HOST": "gateway01.us-east-1.prod.aws.tidbcloud.com",
             "DB_PORT": "3306",
@@ -284,7 +285,7 @@
           "S3Bucket": {
             "Ref": "ServerlessDeploymentBucket"
           },
-          "S3Key": "serverless/asistencia-api/production/1776467533699-2026-04-17T23:12:13.699Z/asistencia-api.zip"
+          "S3Key": "serverless/asistencia-api/production/1776531327146-2026-04-18T16:55:27.146Z/asistencia-api.zip"
         },
         "Handler": "Bref\\LaravelBridge\\Queue\\QueueHandler",
         "Runtime": "provided.al2023",
@@ -294,10 +295,11 @@
         "Environment": {
           "Variables": {
             "APP_URL": "https://api.asistencia.mrqn-labs.com",
-            "APP_ENV": "local",
-            "APP_DEBUG": "true",
+            "APP_ENV": "production",
+            "APP_DEBUG": "false",
             "APP_KEY": "base64:y7Ja4THYKMHJKSxrQbxtWmFeLvZNlEzaHFKXbl1ZJV8=",
             "LOG_CHANNEL": "stderr",
+            "BREF_BINARY_RESPONSES": "1",
             "DB_CONNECTION": "mysql",
             "DB_HOST": "gateway01.us-east-1.prod.aws.tidbcloud.com",
             "DB_PORT": "3306",
@@ -336,25 +338,25 @@
         "JobsWorkerLogGroup"
       ]
     },
-    "ApiLambdaVersiondpDjTiHDnQw98WAkWAvguhGl3VYfLe1HeveEcqaUxU": {
+    "ApiLambdaVersionuk0tP2vk3Ng1wgU31Z2QhGIitmjokY2gXWNALoXIx1c": {
       "Type": "AWS::Lambda::Version",
       "DeletionPolicy": "Retain",
       "Properties": {
         "FunctionName": {
           "Ref": "ApiLambdaFunction"
         },
-        "CodeSha256": "mj3/OPtSt1F9QMl0A4AEucNsnVDLi8OJvq7Njg/ruOk=",
+        "CodeSha256": "t2YIW9syOXdghPcmZ2FqBy/LpjjxG0Ce8+pqSe0tNl8=",
         "Description": "Laravel API Asistencia"
       }
     },
-    "JobsWorkerLambdaVersioncGBcY0Lv9wCtKNDjRwFkYtmjMXagLBdaPUFrrp3nBN0": {
+    "JobsWorkerLambdaVersionWgAoknJyUW90qela92qeCSjapBgGEQ67AMu8yC08": {
       "Type": "AWS::Lambda::Version",
       "DeletionPolicy": "Retain",
       "Properties": {
         "FunctionName": {
           "Ref": "JobsWorkerLambdaFunction"
         },
-        "CodeSha256": "mj3/OPtSt1F9QMl0A4AEucNsnVDLi8OJvq7Njg/ruOk="
+        "CodeSha256": "t2YIW9syOXdghPcmZ2FqBy/LpjjxG0Ce8+pqSe0tNl8="
       }
     },
     "JobsWorkerEventSourceMappingSQSJobsQueueCEDBAE3E": {
@@ -524,7 +526,7 @@
     "ApiLambdaFunctionQualifiedArn": {
       "Description": "Current Lambda function version",
       "Value": {
-        "Ref": "ApiLambdaVersiondpDjTiHDnQw98WAkWAvguhGl3VYfLe1HeveEcqaUxU"
+        "Ref": "ApiLambdaVersionuk0tP2vk3Ng1wgU31Z2QhGIitmjokY2gXWNALoXIx1c"
       },
       "Export": {
         "Name": "sls-asistencia-api-production-ApiLambdaFunctionQualifiedArn"
@@ -533,7 +535,7 @@
     "JobsWorkerLambdaFunctionQualifiedArn": {
       "Description": "Current Lambda function version",
       "Value": {
-        "Ref": "JobsWorkerLambdaVersioncGBcY0Lv9wCtKNDjRwFkYtmjMXagLBdaPUFrrp3nBN0"
+        "Ref": "JobsWorkerLambdaVersionWgAoknJyUW90qela92qeCSjapBgGEQ67AMu8yC08"
       },
       "Export": {
         "Name": "sls-asistencia-api-production-JobsWorkerLambdaFunctionQualifiedArn"
